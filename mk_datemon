@@ -1,0 +1,1 @@
+gcc -shared -o datemon.so datemon.c -I . libmonitor.a  libshift.so
