@@ -27,6 +27,7 @@ class LE84:
 			mod.append(data[k])
 			k += 2
 
+		self.rawmods = mods
 		
 		for im in mods.keys():
 
@@ -144,6 +145,7 @@ class ViewLE84:
 		self.dir.cd()
 		
 		
+		self.hrawmod = TH1F( 'hrawmod', 'hrawmod', 25, 0, 25 )
 		self.hmod = TH1F( 'hmod', 'hmod', 25, 0, 25 )
 		self.hle84 = {}
 		for i in range(1,12):
@@ -157,6 +159,9 @@ class ViewLE84:
 			
 		except 	KeyError:
 			return
+
+		for im in le84.rawmods.keys():
+			self.hrawmod.Fill(im)
 			
 		moduls = le84.moduls
 		for im in moduls.keys():

@@ -153,7 +153,7 @@ class ViewDT84:
 		
 	def Execute(self,event):
 		
-		dtx = DT84(event, 9)
+		dtx = DT84(event,11)
 		dty = DT84(event,10)
 
 		self.hdtx.Fill(dtx)	

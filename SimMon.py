@@ -10,12 +10,21 @@ from Event import *
 from BegSpill import *
 from EndSpill import *
 
+from Gorin import *
 from Stat import *
 from LE78 import *
 from LE76 import *
 from LE84 import * 
 from QDC import *
-
+#from TDC import *
+#from WideHead import *
+#from Hodos import *
+#from HodoMISS import *
+#from Drift import *
+#from PIM import *
+#from Hodoscopes import *
+from BPC import *
+#from DT import *
 from SG import *
 from GDA import *
 from GAMS import *
@@ -24,7 +33,7 @@ from BGD import *
 from DT78 import * 
 from DT84 import * 
 
-from BPC import * 
+from SeMuOnOff import *
 
 from ROOT import TBrowser,TFile
 
@@ -84,18 +93,18 @@ methlist.append(DecodeLE78(11))
 methlist.append(DecodeLE78(12))
 methlist.append(DecodeLE78(13))
 
-#methlist.append(DecodeLE76())
+methlist.append(DecodeLE76())
 
 #methlist.append(DecodeLE84(9))
 
-#methlist.append(ViewHodos(f))
-
-#methlist.append(ViewLE78(f,10))
-#methlist.append(ViewLE78(f,11))
-#methlist.append(ViewLE78(f,12))
-#methlist.append(ViewLE78(f,13))
+methlist.append(ViewLE78(f,10))
+methlist.append(ViewLE78(f,11))
+methlist.append(ViewLE78(f,12))
+methlist.append(ViewLE78(f,13))
 
 #methlist.append(ViewLE84(f))
+
+methlist.append(ViewHodos(f))
 
 #methlist.append(ViewQDC(f,0))
 #methlist.append(ViewQDC(f,1))
@@ -107,17 +116,21 @@ methlist.append(DecodeLE78(13))
 #methlist.append(ViewGAMS(f))
 #methlist.append(ViewBGD(f))
 
-methlist.append(ViewBPC(f))
-
 methlist.append(ViewDT78(f))
 #methlist.append(ViewDT84(f))
+
+methlist.append(ViewBPC(f))
+#methlist.append(ViewPC(f))
+
+#methlist.append(ViewMU(f))
+
 
 ESmethlist = []
 #ESmethlist.append(DecodeQDC(2))
 #ESmethlist.append(DecodeQDC(3))
 #ESmethlist.append(ViewBGD_LED(f))
 
-#BS = BegSpill(f)
+BS = BegSpill(f)
 
 b = TBrowser()
 
@@ -135,10 +148,10 @@ try:
 #			event.Decode()
 #			BS.Execute(event)
 
-#		if event.Type()==6:
-#			event.Decode()
-#			for m in ESmethlist:
-#				m.Execute(event)
+		if event.Type()==6:
+			event.Decode()
+			for m in ESmethlist:
+				m.Execute(event)
 
 		if event.Type()==7:
 			event.Decode()
@@ -149,7 +162,7 @@ except KeyboardInterrupt:
 	print "KeyboardInterrupt"
 else:
 	print "End of File?"
-	dummy = raw_input('Press Enter key.')
+#	dummy = raw_input('Press Enter key.')
 
 print '''
 Saving Histograms,

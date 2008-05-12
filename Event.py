@@ -38,11 +38,7 @@ class Event:
 			k+=6+eqsize
 			
 	def _decode(self,buf):
-		try:
-			nL = buf[18]
-		except IndexError:
-			return
-			
+		nL = buf[18]
 #		print "_decode",nL
 		k = 40
 		

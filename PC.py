@@ -173,3 +173,77 @@ class ViewLE78:
 						self.h3[i].Fill(e)
 					hl[e].Fill(t)
 					
+decode = ( 0,32, 2,34, 4,36, 6,38, 8,40,10,42,12,44,14,46,
+	  16,48,18,50,20,52,22,54,24,56,26,58,28,60,30,62,
+	   1,33, 3,35, 5,37, 7,39, 9,41,11,43,13,45,15,47,
+	  17,49,19,51,21,53,23,55,25,57,27,59,29,61,31,63)
+
+class ViewPC:
+
+
+	class PC:
+	
+
+		def __init__(self,event,cr,rfirst,rlast):
+		
+			self.hits = []
+		
+			try:
+				le78 = event.reco["LE78-%2d"%cr]
+			
+			except KeyError:
+				return
+
+			for im in range(rfirst,rlast):
+				try:
+					m = le78.moduls[im]
+				except KeyError:
+					continue
+			
+				for t,e in m:
+					ed = decode[e]
+					hit = (t,ed+(im-rfirst)*64)
+					self.hits.append(hit)
+	class HPC:
+		def __init__(self,rootfile,size,name):
+			self.dir = rootfile.mkdir(name)
+			self.dir.cd()
+			self.hprofile = TH1F( 'profile %s'%name, 'profile %s'%name, size, 0, size )
+			self.htime = TH1F( 'time %s'%name, 'time %s'%name, 128, 0, 128 )
+			self.hprofilet = TH1F( 'profileT %s'%name, 'profileT %s'%name, size, 0, size )
+			self.hprofilet1 = TH1F( 'profileT1 %s'%name, 'profileT1 %s'%name, size/2, 0, size/2 )
+			self.hprofilet2 = TH1F( 'profileT2 %s'%name, 'profileT2 %s'%name, size/2, 0, size/2 )
+			
+		def Fill(self,pc):
+			for t,e in pc.hits:
+				self.hprofile.Fill(e)
+				self.htime.Fill(t)
+				if 60<t<80:
+					self.hprofilet.Fill(e)
+					ehalf,half = divmod(e,2)
+					if half == 0:
+						self.hprofilet1.Fill(ehalf)
+					else:
+						self.hprofilet2.Fill(ehalf)
+					
+					
+								
+	def __init__(self,rootfile):
+
+		self.dir = rootfile.mkdir("PC")
+		self.dir.cd()
+		
+		self.hpcy2 = self.HPC(self.dir,64*7,"Y2")
+		self.hpcx3 = self.HPC(self.dir,64*10,"X3")
+		self.hpcx2 = self.HPC(self.dir,64*10,"X2")
+
+	def Execute(self,event):
+		
+		pcy2 = self.PC(event,12,4,11)
+		self.hpcy2.Fill(pcy2)	
+		
+		pcx3 = self.PC(event,13,4,14)
+		self.hpcx3.Fill(pcx3)	
+		
+		pcx2 = self.PC(event,13,14,24)
+		self.hpcx2.Fill(pcx2)	

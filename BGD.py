@@ -155,7 +155,7 @@ class ViewBGD_LED:
 			hy = []
 			for y in range(32):
 				name = "hLED_%02d_%02d"%(x+1,y+1)
-				hy.append(TH1F( name, name,4000, 0, 4000 ))
+				hy.append(TH1F( name, name,5000, 0, 5000 ))
 			self.hxy.append(hy)
 
 	def Execute(self,event):

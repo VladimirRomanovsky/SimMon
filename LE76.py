@@ -84,6 +84,12 @@ class HODOSCOPE:
 #		print self.hits
 #		print self.cls
 
+A_decode = (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+class HSTRIP(HODOSCOPE):
+	def __init__(self,data):
+		HODOSCOPE.__init__(self, A_decode, data)
+
 S_decode = (1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14)
 
 class H1X(HODOSCOPE):
@@ -100,7 +106,8 @@ class H3Y(HODOSCOPE):
 		HODOSCOPE.__init__(self, decode3, data)
 
 G_decode = (0,15,1,14,2,13,3,12,4,11,5,10,6,9,7,8)
-decode2x = [15-i for i in G_decode] + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
+G_decode_2x = (0,1,15,14,2,13,3,12,4,11,5,10,6,9,7,8)
+decode2x = [15-i for i in G_decode_2x] + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
 decode2y = list(G_decode) + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
 
 class H2X(HODOSCOPE):
@@ -159,6 +166,8 @@ class ViewHodos:
 		self.hists["H3Y"] = self.HodosHist(self.dir,"H3Y",32)
 		self.hists["H2X"] = self.HodosHist(self.dir,"H2X",48)
 		self.hists["H2Y"] = self.HodosHist(self.dir,"H2Y",48)
+		self.hists["HSX"] = self.HodosHist(self.dir,"HSX",16)
+		self.hists["HSY"] = self.HodosHist(self.dir,"HSY",16)
 		
 		
 
@@ -201,6 +210,14 @@ class ViewHodos:
 			pass
 		else:
 			hodos["H2Y"] = H2Y(reg[0:3])
+
+		try:
+			reg = le76.reg[4]
+		except KeyError:
+			pass
+		else:
+			hodos["HSX"] = HSTRIP(reg[0:1])
+			hodos["HSY"] = HSTRIP(reg[1:2])
 
 
 		for h in hodos.keys():
