@@ -1,6 +1,7 @@
 from ROOT import TH1F, TH2F
 
 from BGD import gbgd	
+from SG import gsg	
 		
 class BegSpill:
 
@@ -24,6 +25,8 @@ class BegSpill:
 				hs.append( TH1F( 'SIG_modul_%i'%k, 'SIG_modul_%i'%k, 96, 0, 96))
 			self.hped.append(hp)
 			self.hsig.append(hs)
+			
+		self.sgfile = open("sg.ped","w")
 
 
 	def Execute(self,event):
@@ -33,6 +36,7 @@ class BegSpill:
 		det = event.det
 		if len(det)==0:
 			return
+		sg = {}
 			
 		for d in det.iterkeys():
 			if d not in (0,1,2,3):
@@ -77,13 +81,21 @@ class BegSpill:
 				hsig[m].SetBinContent(e+1,sigma)
 				k += 2
 				
+				if d == 2 and m in (5,6) and e<96:
+					x,e1 = divmod(e,24)
+					enew = 96 *(m-5) + x*24 + (23-e1)
+					sg[enew]=(mean,sigma)
+
+
 				try:
 					x,y = gbgd.QDC2BGD(d,m,e)
 				except KeyError:
 					continue
-
+				
 				self.hmean.SetBinContent(x,y,mean)
 				self.hsigma.SetBinContent(x,y,sigma)
-	
-#		import sys
-#		sys.exit()		
+
+		for i in sg.keys():
+#			print i,sg[i][0],sg[i][1]	
+			self.sgfile.write("%i %i %i\n"%(i,sg[i][0],sg[i][1]))
+		self.sgfile.flush()

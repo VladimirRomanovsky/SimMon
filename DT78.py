@@ -4,8 +4,7 @@ DT78_decode = ((4,2,5,1,6,0,7,3),(3,7,0,6,1,5,2,4),(4,2,5,1,6,0,7,3),(3,7,0,6,1,
 
 class DT78:
 	def __init__(self,event,modul):
-		
-		self.event = event	
+	
 		self.pls = {0:[],1:[],2:[],3:[]}
 		
 		try:
@@ -85,15 +84,6 @@ class ViewDT78:
 				self.hwt[i] = hwt
 				self.hwn[i] = hwn
 
-			tdir = self.dir.mkdir("HOD")
-			tdir.cd()
-			
-			self.hX = []
-			self.hY = []
-			for i in range(4):
-				self.hX.append(TH2F( 'hX_%i'%i, 'h_%i'%i,8, 0, 8, 48, 0, 48 ))
-				self.hY.append(TH2F( 'hY_%i'%i, 'h_%i'%i,8, 0, 8, 48, 0, 48 ))
-
 
 		def Fill(self,dt):
 		
@@ -161,36 +151,6 @@ class ViewDT78:
 					if len(ws[k]) >1:
 						for l in range(1,len(ws[k])):
 							self.hwt[i][k].Fill(ws[k][l]-ws[k][l-1])        	       
-
-
-			try:
-				hodos = dt.event.reco["HODOS"]
-
-			except  KeyError:
-				return
-					
-			try:
-				h1x = hodos["H2X"]
-			except KeyError:
-				pass
-			else:
-				for h in h1x.hits:
-					for i in dt.pls:
-						for t,e in dt.pls[i]:
-							self.hX[i].Fill(e,h)
-			
-			try:
-				h1y = hodos["H2Y"]
-			except KeyError:
-				pass
-			else:
-				for h in h1y.hits:
-					for i in dt.pls:
-						for t,e in dt.pls[i]:
-							self.hY[i].Fill(e,h)
-			
-
-			
 	def __init__(self,rootfile):
 
 		

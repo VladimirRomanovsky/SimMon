@@ -85,3 +85,4 @@ class ViewMU:
 			if count>2:
 				self.hc3[i].Fill(mu[i])
 
+		event.reco["MU"] = mu

@@ -10,22 +10,13 @@ from Event import *
 from BegSpill import *
 from EndSpill import *
 
-from Gorin import *
 from Stat import *
 from LE78 import *
 from LE76 import *
 from LE84 import * 
 from NIM84 import * 
 from QDC import *
-#from TDC import *
-#from WideHead import *
-#from Hodos import *
-#from HodoMISS import *
-#from Drift import *
-#from PIM import *
-#from Hodoscopes import *
 from BPC import *
-#from DT import *
 from SG import *
 from GDA import *
 from GAMS import *
@@ -86,22 +77,22 @@ methlist.append(Stat(f))
 
 #methlist.append(DecodeQDC(0))
 #methlist.append(DecodeQDC(1))
-#methlist.append(DecodeQDC(2))
+methlist.append(DecodeQDC(2))
 #methlist.append(DecodeQDC(3))
 
-methlist.append(DecodeLE78(10))
-methlist.append(DecodeLE78(11))
-methlist.append(DecodeLE78(12))
-methlist.append(DecodeLE78(13))
+#methlist.append(DecodeLE78(10))
+#methlist.append(DecodeLE78(11))
+#methlist.append(DecodeLE78(12))
+#methlist.append(DecodeLE78(13))
 
 methlist.append(DecodeLE76())
 
 #methlist.append(DecodeLE84(9))
 
-methlist.append(ViewLE78(f,10))
-methlist.append(ViewLE78(f,11))
-methlist.append(ViewLE78(f,12))
-methlist.append(ViewLE78(f,13))
+#methlist.append(ViewLE78(f,10))
+#ethlist.append(ViewLE78(f,11))
+#methlist.append(ViewLE78(f,12))
+#methlist.append(ViewLE78(f,13))
 
 #methlist.append(ViewLE84(f))
 
@@ -109,22 +100,22 @@ methlist.append(ViewHodos(f))
 
 #methlist.append(ViewQDC(f,0))
 #methlist.append(ViewQDC(f,1))
-#methlist.append(ViewQDC(f,2))
+methlist.append(ViewQDC(f,2))
 #methlist.append(ViewQDC(f,3))
 
 #methlist.append(ViewMU(f))
 
-#methlist.append(ViewSG(f))
+methlist.append(ViewSG(f))
 #methlist.append(ViewGDA(f))
 #methlist.append(ViewGAMS(f))
 #methlist.append(ViewBGD(f))
 
-methlist.append(ViewDT78(f))
+#methlist.append(ViewDT78(f))
 #methlist.append(ViewDT84(f))
 
 #methlist.append(ViewNIM84(f))
 
-methlist.append(ViewBPC(f))
+#methlist.append(ViewBPC(f))
 #methlist.append(ViewPC(f))
 
 
@@ -148,9 +139,9 @@ try:
 		event = Event(buff)
 #		print "Type of ev. %d"%event.Type()
 
-#		if event.Type()==5:
-#			event.Decode()
-#			BS.Execute(event)
+		if event.Type()==5:
+			event.Decode()
+			BS.Execute(event)
 
 #		if event.Type()==6:
 #			event.Decode()

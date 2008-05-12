@@ -14,6 +14,8 @@ class SG:
 	def __getitem__(self,e):
 		
 		return  self.ringmap[e]
+
+gsg = SG()
 								
 class ViewSG:
 
@@ -55,6 +57,10 @@ class ViewSG:
 		self.hn = TH1F( 'hn', 'hn',200, 0, 200 )
 		self.hamp = TH1F( 'hamp', 'hamp',4096, 0, 4096 )
 		self.hsum = TH1F( 'hsum', 'hsum',4096, 0, 4096 )
+
+		self.hee = TH2F( 'hee', 'hee',10, 0, 10, 10, 0, 10)
+		self.haa = TH2F( 'haa', 'haa',128, 0, 4096, 128, 0, 4096)
+		
 		self.hrings = []
 		for i in range(11):
 			self.hrings.append(self.HSG(self.dir,i,self.SG.ringconfig[i]))
@@ -103,3 +109,18 @@ class ViewSG:
 		for r in rings.keys():
 			self.hrings[r].Fill(rings[r])
 	
+		try:
+			r0 = rings[0]
+			r1 = rings[1]
+		except KeyError:
+			return
+		
+		for a0,e0 in r0:
+			for a1,e1 in r1:
+				if a0>100 and a1 >100:
+					self.hee.Fill(e0,e1)
+				if e0 == e1:
+					self.haa.Fill(a0,a1)
+				
+			
+		

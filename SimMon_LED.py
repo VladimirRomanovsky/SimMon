@@ -15,7 +15,6 @@ from Stat import *
 from LE78 import *
 from LE76 import *
 from LE84 import * 
-from NIM84 import * 
 from QDC import *
 #from TDC import *
 #from WideHead import *
@@ -89,26 +88,26 @@ methlist.append(Stat(f))
 #methlist.append(DecodeQDC(2))
 #methlist.append(DecodeQDC(3))
 
-methlist.append(DecodeLE78(10))
-methlist.append(DecodeLE78(11))
-methlist.append(DecodeLE78(12))
-methlist.append(DecodeLE78(13))
+#methlist.append(DecodeLE78(10))
+#methlist.append(DecodeLE78(11))
+#methlist.append(DecodeLE78(12))
+#methlist.append(DecodeLE78(13))
 
-methlist.append(DecodeLE76())
+#methlist.append(DecodeLE76())
 
 #methlist.append(DecodeLE84(9))
 
-methlist.append(ViewLE78(f,10))
-methlist.append(ViewLE78(f,11))
-methlist.append(ViewLE78(f,12))
-methlist.append(ViewLE78(f,13))
+#methlist.append(ViewLE78(f,10))
+#methlist.append(ViewLE78(f,11))
+#methlist.append(ViewLE78(f,12))
+#methlist.append(ViewLE78(f,13))
 
 #methlist.append(ViewLE84(f))
 
-methlist.append(ViewHodos(f))
+#methlist.append(ViewHodos(f))
 
 #methlist.append(ViewQDC(f,0))
-#methlist.append(ViewQDC(f,1))
+#ethlist.append(ViewQDC(f,1))
 #methlist.append(ViewQDC(f,2))
 #methlist.append(ViewQDC(f,3))
 
@@ -119,24 +118,22 @@ methlist.append(ViewHodos(f))
 #methlist.append(ViewGAMS(f))
 #methlist.append(ViewBGD(f))
 
-methlist.append(ViewDT78(f))
+#methlist.append(ViewDT78(f))
 #methlist.append(ViewDT84(f))
 
-#methlist.append(ViewNIM84(f))
-
-methlist.append(ViewBPC(f))
+#methlist.append(ViewBPC(f))
 #methlist.append(ViewPC(f))
 
 
 ESmethlist = []
-#ESmethlist.append(DecodeQDC(2))
-#ESmethlist.append(DecodeQDC(3))
-#ESmethlist.append(ViewBGD_LED(f))
-#ESmethlist.append(ViewLedGDA(f))
+ESmethlist.append(DecodeQDC(2))
+ESmethlist.append(DecodeQDC(3))
+ESmethlist.append(ViewBGD_LED(f))
+ESmethlist.append(ViewLedGDA(f))
 
 BS = BegSpill(f)
 
-b = TBrowser()
+#b = TBrowser()
 
 try:
 	while True:
@@ -152,21 +149,21 @@ try:
 #			event.Decode()
 #			BS.Execute(event)
 
-#		if event.Type()==6:
-#			event.Decode()
-#			for m in ESmethlist:
-#				m.Execute(event)
-
-		if event.Type()==7:
+		if event.Type()==6:
 			event.Decode()
-			for m in methlist:
+			for m in ESmethlist:
 				m.Execute(event)
+
+#		if event.Type()==7:
+#			event.Decode()
+#			for m in methlist:
+#				m.Execute(event)
 			
 except KeyboardInterrupt:
 	print "KeyboardInterrupt"
 else:
 	print "End of File?"
-	dummy = raw_input('Press Enter key.')
+#	dummy = raw_input('Press Enter key.')
 
 print '''
 Saving Histograms,
