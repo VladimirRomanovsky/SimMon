@@ -62,6 +62,7 @@ class HODOSCOPE:
 			for i in range(16):
 				k = (d>>i)&0x1
 				if k:
+				    if not self.decode[j*16+i] is None:
 					self.hits.append(self.decode[j*16+i])
 
 		self.hits.sort()
@@ -108,6 +109,7 @@ class H3Y(HODOSCOPE):
 G_decode = (0,15,1,14,2,13,3,12,4,11,5,10,6,9,7,8)
 G_decode_2x = (0,1,15,14,2,13,3,12,4,11,5,10,6,9,7,8)
 decode2x = [15-i for i in G_decode_2x] + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
+decode2x[42] = None
 decode2y = list(G_decode) + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
 
 class H2X(HODOSCOPE):
@@ -168,6 +170,7 @@ class ViewHodos:
 		self.hists["H2Y"] = self.HodosHist(self.dir,"H2Y",48)
 		self.hists["HSX"] = self.HodosHist(self.dir,"HSX",16)
 		self.hists["HSY"] = self.HodosHist(self.dir,"HSY",16)
+		self.hists["HSZ"] = self.HodosHist(self.dir,"HSZ",16)
 		
 		
 
@@ -218,6 +221,7 @@ class ViewHodos:
 		else:
 			hodos["HSX"] = HSTRIP(reg[0:1])
 			hodos["HSY"] = HSTRIP(reg[1:2])
+			hodos["HSZ"] = HSTRIP(reg[2:3])
 
 
 		for h in hodos.keys():
@@ -275,4 +279,5 @@ class ViewHodos:
 					for h3 in h3y.hits:
 						self.h1y2y3y.Fill(h1,h2,h3)
 			
-		event.reco["HODOS"] = hodos
+		for hod in hodos.keys():
+		    event.reco[hod]=hodos[hod]

@@ -15,9 +15,9 @@ class ViewGAMS:
 		self.hxy = TH2F( 'hxy', 'hxy',48, 1, 49, 48, 1, 49 )
 		self.hxya = TH2F( 'hxya', 'hxya',48, 1, 49, 48, 1, 49 )
 
-		self.hsum = TH1F( 'hsum', 'hsum',1000, 0, 1000 )
+		self.hsum = TH1F( 'hsum', 'hsum',1000, 0, 4000 )
 		self.hnum = TH1F( 'hnum', 'hnum',100, 0, 100 )
-		self.hsn = TH2F( 'hsn', 'hsn',100, 0, 1000, 100, 0, 100 )
+		self.hsn = TH2F( 'hsn', 'hsn',100, 0, 4000, 100, 0, 100 )
 
 		self.hdxdy = TH2F( 'hdxdy', 'hdxdy',20, 0, 20, 20, 0, 20 )
 		self.hdxdya = TH2F( 'hdxdya', 'hdxdya',20, 0, 20, 20, 0, 20 )
@@ -25,16 +25,17 @@ class ViewGAMS:
 		self.hncl = TH1F( 'hncl', 'hncl',20, 0, 20 )
 
 		self.hclnum = TH1F( 'hclnum', 'hclnum',10, 0, 10 )
-		self.hclsum = TH1F( 'hclsum', 'hclsum',1000, 0, 1000 )
+		self.hclsum = TH1F( 'hclsum', 'hclsum',1000, 0, 4000 )
 		self.hclxy = TH2F( 'hclxy', 'hclxy',48, 1, 49, 48, 1, 49 )
 		self.hclxye = TH2F( 'hclxye', 'hclxye',48, 1, 49, 48, 1, 49 )
-		self.hclsumg = TH1F( 'hclsumg', 'hclsumg',1000, 0, 1000 )
+		self.hclsumg = TH1F( 'hclsumg', 'hclsumg',1000, 0, 4000 )
 		self.hclxyg = TH2F( 'hclxyg', 'hclxyg',48, 1, 49, 48, 1, 49 )
 		self.hclxyeg = TH2F( 'hclxyeg', 'hclxyeg',48, 1, 49, 48, 1, 49 )
 
 		self.bad = []
 		
 #		self.bad.append((ix, iy))
+		self.bad.append((25, 32))
 
 		baddir = self.dir.mkdir("BAD")
 		baddir.cd()
@@ -108,8 +109,6 @@ class ViewGAMS:
 					self.hdxdya.Fill(dx,dy,a1*a2)
 		
 		cls = []
-		gamsl.sort(cmp=lambda x,y: cmp(x[2], y[2]))
-
 		for x,y,a in gamsl:
 			if a>=10:
 				maxv = gams[x-1:x+2,y-1:y+2].max()

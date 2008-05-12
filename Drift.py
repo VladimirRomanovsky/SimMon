@@ -10,48 +10,32 @@ class LE84:
 
 class ViewDrift:
 
-	class HLE84:
-		def __init__(self,rootfile,number):
-			dir = rootfile.mkdir("LE84_%02i"%number)
-			dir.cd()
-
-			dir1 = dir.mkdir("TDC1")
-			dir2 = dir.mkdir("TDC2")
-
-			self.hch = []
-			self.hch.append(TH1F( 'hchanel1', 'hchanel1', 32, 0, 32 ))
-			self.hch.append(TH1F( 'hchanel2', 'hchanel2', 32, 0, 32 ))
-			
-			
-			self.ht = [[],[]]
-			ht1 = self.ht[0]
-			ht2 = self.ht[1]
-			for i in range(32):
-				dir1.cd()
-				ht1.append(TH1F( 'h1time-%02d'%i, 'h1time-%02d'%i, 1024, 0, 1024 ))
-				dir2.cd()
-				ht2.append(TH1F( 'h2time-%02d'%i, 'h2time-%02d'%i, 1024, 0, 1024 ))
-			
-		def Fill(self,data):
-			
-			for i,tdc in enumerate(data):
-				for ch,t in tdc:
-					self.hch[i].Fill(ch)
-					self.ht[i][ch].Fill(t)
-			
-			
 	def __init__(self,rootfile):
 
-		self.dir = rootfile.mkdir("Drift")
-		self.dir.cd()
+		dir = rootfile.mkdir("Drift")
+		dir.cd()
 		
-		self.hle84 = {}
-		for i in range(1,4):
-			self.hle84[i]=self.HLE84(self.dir,i)
+		self.h1ch = TH1F( 'h1ch', 'h1ch',32, 0, 32 )
+		self.h1time = TH1F( 'h1time', 'h1time', 1024, 0, 1024 )
+		self.h2ch = TH1F( 'h2ch', 'h2ch',32, 0, 32 )
+		self.h2time = TH1F( 'h2time', 'h2time', 1024, 0, 1024 )
 
+		self.hdtime24 = TH1F( 'hdtime24', 'hdtime24', 1024, 0, 1024 )
+		self.hdtime28 = TH1F( 'hdtime28', 'hdtime28', 1024, 0, 1024 )
 
-		self.h13 = TH2F( 'htime13', 'htime13', 1024, 0, 1024 , 1024, 0, 1024 )
-		self.hd13 = TH1F( 'hdtime13', 'hdtime13', 2048, -1024, 1024 )
+		self.hddtime = TH1F( 'hddtime', 'hddtime', 1024, -1024, 1024 )
+		
+		dir1 = dir.mkdir("TDC1")
+		dir2 = dir.mkdir("TDC2")
+
+		self.h1l = []
+		self.h2l = []
+		for i in range(32):
+			dir1.cd()
+			self.h1l.append(TH1F( 'h1time-%02d'%i, 'h1time-%02d'%i, 1024, 0, 1024 ))
+			dir2.cd()
+			self.h2l.append(TH1F( 'h2time-%02d'%i, 'h2time-%02d'%i, 1024, 0, 1024 ))
+		
 
 	def Execute(self,event):
 		
@@ -78,67 +62,65 @@ class ViewDrift:
 
 			mod.append(data[k])
 			k += 2
-
 #		print mods
-#		for im in mods.keys():
-#		    print im,len(mods[im])
-#		return
-		
-		le84 = {}		
-		
-		for im in mods.keys():
 
-#			print "Modul: %i leng: %i"%(im,len(mods[im]))
+		try:
+		    mod = mods[2]
+		except 	KeyError:
+			return
+		
+		TDC1 = []
+		TDC2 = []
+		for i in range(len(mod)/2):
+			w32 = mod[2*i+1]<<16|mod[2*i]
+#			print "%08X"%w32
+			w8 = w32>>24
+			tdc = w8&0xF
+			ident = w8>>4
+#			print tdc,ident
 			
-			if im not in (1,2,3):
-				print " LE84:: Error modul number: %i"%i
-				continue 
+			if tdc==2:
+				TDC2.append(w32)
+			if tdc==1:
+				TDC1.append(w32)
 
-			mod = mods[im]
-		
-			TDC1 = []
-			TDC2 = []
-
-			for i in range(len(mod)/2):
-
-				w32 = mod[2*i+1]<<16|mod[2*i]
-
-#				print "%08X"%w32
-				w8 = w32>>24
-				tdc = w8&0xF
-				ident = w8>>4
-#				print tdc,ident
-			
-				if tdc==2:
-					TDC2.append(w32)
-				if tdc==1:
-					TDC1.append(w32)
-
-			dt1 = []
-			if len(TDC1)==(TDC1[-1]&0xFF):
-				for h in TDC1[1:-1]:
-					time = h&0x3FF
-					chan = h>>18&0x1F
-#					print chan,time
-					dt1.append((chan,time))
+		dt1 = []
+		if len(TDC1)==(TDC1[-1]&0xFF):
+			for h in TDC1[1:-1]:
+				time = h&0x3FF
+				chan = h>>18&0x1F
+#				print chan,time
+				self.h1ch.Fill(chan)
+				self.h1time.Fill(time)
+				self.h1l[chan].Fill(time)
+				dt1.append((chan,time))
 				
-			dt2 = []
-			if len(TDC2)==(TDC2[-1]&0xFF):
-				for h in TDC2[1:-1]:
-					time = h&0x3FF
-					chan = h>>18&0x1F
-#					print chan,time
-					dt2.append((chan,time))
+		dt2 = []
+		if len(TDC2)==(TDC2[-1]&0xFF):
+			for h in TDC2[1:-1]:
+				time = h&0x3FF
+				chan = h>>18&0x1F
+#				print chan,time
+				self.h2ch.Fill(chan)
+				self.h2time.Fill(time)
+				self.h2l[chan].Fill(time)
+				dt2.append((chan,time))
 				
-			dt  = (dt1,dt2)
-			self.hle84[im].Fill(dt)
-			
-			le84[im] = dt
 
-		print le84
+		event.reco["DT"] = dt1
 
-		t1 = le84[3][0][0][1]
-		t3 = le84[3][0][1][1]
-		self.h13.Fill(t1,t3)
-		self.hd13.Fill(t1-t3)		
-		
+		t0_24 = None
+		t0_28 = None
+		for chan,time in dt1:
+			if chan == 24:
+				if t0_24:
+					self.hdtime24.Fill(time-t0_24)
+				else:
+					t0_24 = time
+			if chan == 28:
+				if t0_28:
+					self.hdtime28.Fill(time-t0_28)
+				else:
+					t0_28 = time
+		if t0_28 and t0_24:
+			self.hddtime.Fill(t0_28 - t0_24)

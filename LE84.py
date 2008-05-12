@@ -27,7 +27,6 @@ class LE84:
 			mod.append(data[k])
 			k += 2
 
-		self.rawmods = mods
 		
 		for im in mods.keys():
 
@@ -117,9 +116,6 @@ class ViewLE84:
 			self.hch = []
 			self.hch.append(TH1F( 'hchanel1', 'hchanel1', 32, 0, 32 ))
 			self.hch.append(TH1F( 'hchanel2', 'hchanel2', 32, 0, 32 ))
-			self.htall = []
-			self.htall.append(TH1F( 'h1time', 'h1time', 1024, 0, 1024 ))
-			self.htall.append(TH1F( 'h2time', 'h2time', 1024, 0, 1024 ))
 			
 			
 			self.ht = [[],[]]
@@ -136,7 +132,6 @@ class ViewLE84:
 			for i,tdc in enumerate(data):
 				for ch,t in tdc:
 					self.hch[i].Fill(ch)
-					self.htall[i].Fill(t)
 					self.ht[i][ch].Fill(t)
 			
 	def __init__(self,rootfile):
@@ -145,7 +140,6 @@ class ViewLE84:
 		self.dir.cd()
 		
 		
-		self.hrawmod = TH1F( 'hrawmod', 'hrawmod', 25, 0, 25 )
 		self.hmod = TH1F( 'hmod', 'hmod', 25, 0, 25 )
 		self.hle84 = {}
 		for i in range(1,12):
@@ -159,9 +153,6 @@ class ViewLE84:
 			
 		except 	KeyError:
 			return
-
-		for im in le84.rawmods.keys():
-			self.hrawmod.Fill(im)
 			
 		moduls = le84.moduls
 		for im in moduls.keys():

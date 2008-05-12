@@ -10,35 +10,27 @@ from Event import *
 from BegSpill import *
 from EndSpill import *
 
+from Gorin import *
 from Stat import *
-from LE76 import *
 from LE78 import *
 from QDC import *
 from TDC import *
 from WideHead import *
+from Hodos import *
+from HodoMISS import *
 from Drift import *
 from PIM import *
+from Hodoscopes import *
 from BC import *
-from BPC import *
-from DT78 import *
+from DT import *
 from SG import *
 from GDA import *
 from GAMS import *
 from BGD import *
-from PC import *
 
 from ROOT import TBrowser,TFile
 
 import sys
-
-#print """
-#	Don't use SimMon.py, PLEASE.
-#	Use instead:
-#			SimMonCALO
-#			SimMonTRACK
-#"""
-#sys.exit(0)
-
 
 if len(sys.argv) < 2:
 	print '''
@@ -75,6 +67,7 @@ buff_type = c_ushort*size
 
 buff = buff_type()
 
+filename = "SimMonCALO.root"
 #filename = strftime("SimMon_%d-%b-%Y_%H:%M:%S.root", localtime())
 filename = "SimMon.root"
 
@@ -84,42 +77,48 @@ methlist = []
 
 methlist.append(Stat(f))
 
-#methlist.append(DecodeQDC(0))
-#methlist.append(DecodeQDC(1))
-#methlist.append(DecodeQDC(2))
-#methlist.append(DecodeQDC(3))
+methlist.append(DecodeQDC(0))
+methlist.append(DecodeQDC(1))
+methlist.append(DecodeQDC(2))
+methlist.append(DecodeQDC(3))
 #methlist.append(DecodeTDC())
+#methlist.append(DecodeLE78(10))
+#ethlist.append(DecodeLE78(11))
+#methlist.append(DecodeLE78(12))
+#methlist.append(DecodeLE78(13))
 
-#methlist.append(DecodeLE76())
-
-methlist.append(DecodeLE78(10))
-methlist.append(DecodeLE78(11))
-methlist.append(DecodeLE78(12))
-methlist.append(DecodeLE78(13))
-
-methlist.append(ViewLE78(f,10))
-methlist.append(ViewLE78(f,11))
-methlist.append(ViewLE78(f,12))
-methlist.append(ViewLE78(f,13))
+#methlist.append(ViewLE78(f,10))
+#methlist.append(ViewLE78(f,11))
+#methlist.append(ViewLE78(f,12))
+#methlist.append(ViewLE78(f,13))
 
 #methlist.append(ViewDrift(f))
 
-methlist.append(ViewHodos(f))
+#methlist.append(ViewQDC(f,0))
+#methlist.append(ViewQDC(f,1))
+#methlist.append(ViewQDC(f,2))
+#methlist.append(ViewQDC(f,3))
 
-methlist.append(ViewDT78(f))
+#methlist.append(ViewPIM(f))
+#methlist.append(ViewHodos(f))
+#methlist.append(ViewHodoMISS(f))
+#methlist.append(ViewGorin(f))
+#methlist.append(ViewTDC(f))
+#methlist.append(TreeTDC(f))
+#methlist.append(ViewWideHead(f))
 
-methlist.append(ViewBPC(f))
-methlist.append(ViewPC(f))
+#methlist.append(ViewHodoscopes(f))
+#methlist.append(ViewBC(f))
 #methlist.append(ViewDT(f))
-#methlist.append(ViewSG(f))
+methlist.append(ViewSG(f))
 #methlist.append(ViewGDA(f))
-#methlist.append(ViewGAMS(f))
-#methlist.append(ViewBGD(f))
+methlist.append(ViewGAMS(f))
+methlist.append(ViewBGD(f))
 
 ESmethlist = []
-#ESmethlist.append(DecodeQDC(2))
-#ESmethlist.append(DecodeQDC(3))
-#ESmethlist.append(ViewBGD_LED(f))
+ESmethlist.append(DecodeQDC(2))
+ESmethlist.append(DecodeQDC(3))
+ESmethlist.append(ViewBGD_LED(f))
 
 BS = BegSpill(f)
 

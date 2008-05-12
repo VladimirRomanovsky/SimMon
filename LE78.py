@@ -52,22 +52,22 @@ class LE78:
 			d = self.rawmoduls[i]
 			mod = None
 			if len(d)!=d[0]+1:
-				return			
+				continue 		
 			if d[1]!=i:
-				return
+				continue
 			if nev:
 				if nev!=(d[-1]&0x3FFF):
-					return
+					continue
 			else:
 				nev = (d[-1]&0x3FFF)
 			if d[-1]>>14 != 1:
-				return
+				continue
 			 
 			hits=[]
 			if d[0]>2:
 				for k in d[2:-1]:
 					if k>>14 != 0:
-						return
+						break
 					hits.append((k&0xFF,(k>>8)&0x3F))
 
 #					if (k&0xFF) == i and ((k>>8)&0x3F) == 0:

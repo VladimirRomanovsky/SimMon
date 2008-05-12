@@ -13,7 +13,7 @@ class Stat:
 	def Execute(self,event):
 		
 		det = event.det
-		
+#		print det.keys()
 		for d in det.iterkeys():
 #			print d,det[d]
 			try:

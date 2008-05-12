@@ -5,6 +5,7 @@ class Event:
 		self.det = {}
 		self.eq = 0
 		self.reco = {}
+		self.select = {}
 		
 	def Type(self):
 		return self.data[4]
@@ -38,8 +39,10 @@ class Event:
 			k+=6+eqsize
 			
 	def _decode(self,buf):
-		nL = buf[18]
-#		print "_decode",nL
+		if len(buf)<40:
+			return
+		nL = buf[25]
+#		print "_decode",buf[0:40]
 		k = 40
 		
 		if nL == 0:

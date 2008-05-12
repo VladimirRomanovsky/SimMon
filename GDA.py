@@ -1,186 +1,215 @@
 from ROOT import TH1F,TH2F
 
-from numpy import zeros
-
-class GDA:
-
-	def __init__(self):
-	
-		conf = file("config_gda.dat")
-
-		self.decodem7 = {}
-		self.decodem8 = {}
-		for string in conf:
-			ss = string.split()
-			x = int(ss[0])
-			y = int(ss[1])
-			m = int(ss[2])
-			e = int(ss[3])
-			if m == 7:
-				self.decodem7[e] = (x,y)
-			if m == 8:
-				self.decodem8[e] = (x,y)
-	
-	def Decode(self,event):
-
-		self.hits = []
-		 
-		try:
-			qdc = event.reco["QDC-2"]
-
-		except KeyError:
-			return
-
-		try:
-			data = qdc.moduls[7]
-		except:
-			pass
-		else:
-			for a,e in data:
-				if e<96:
-					try:
-						x,y = self.decodem7[e]
-					except KeyError:
-						pass
-					else:
-						self.hits.append((x,y,a+3))
-		try:
-			data = qdc.moduls[8]
-		except:
-			pass
-		else:
-			for a,e in data:
-				if e<96:
-					try:
-						x,y = self.decodem8[e]
-					except KeyError:
-						pass
-					else:
-						self.hits.append((x,y,a+3))
-		
-	def __str__(self):
-		res =  "GDA:\n"
-		for h in  self.hits:
-			res += "(%i %i %i)"%h
-		return res
-
-gda = GDA()
-		
-
-class ViewLedGDA:
-
-        class HModQDC:
-                def __init__(self,rootfile,name):
-
-                        self.dir = rootfile.mkdir(name)
-                        self.dir.cd()
-			
-			self.hl = []
-			for i in range(96):
-				self.hl.append(TH1F( 'hamp-%02d'%i, 'hamp-%02d'%i, 4096, 0, 4096 ))
-			self.h = TH1F( 'h', 'h', 96, 0, 96 )
-
-		def Fill(self,data):
-			for a,e in data:
-				if e<96:
-					self.hl[e].Fill(a)
-					self.h.Fill(e)
-
-	def __init__(self,rootfile):
-
-		self.dir = rootfile.mkdir("GDA_LED")
-		self.dir.cd()
-		
-		self.hm7 = self.HModQDC(self.dir,"Modul7")
-		self.hm8 = self.HModQDC(self.dir,"Modul8")
-		
-		ampdir = self.dir.mkdir("AMP")
-		ampdir.cd()
-
-		self.hamps=[]
-		for x in range(1,12):
-			hists = []
-			for y in range(1,12):
-				hists.append(TH1F( 'hamp_%i_%i'%(x,y), 'hamp_%i_%i'%(x,y),500, 0, 5000 ))
-			self.hamps.append(hists)
-
-	def Execute(self,event):
-		try:
-			qdc = event.reco["QDC-2"]
-
-		except KeyError:
-			return
-
-		try:
-			m7 = qdc.moduls[7]
-		except:
-			pass
-		else:
-			self.hm7.Fill(m7)
-
-		try:
-			m8 = qdc.moduls[8]
-		except:
-			pass
-		else:
-			self.hm8.Fill(m8)
-
-		gda.Decode(event)
-		for x,y,a in gda.hits:
-			self.hamps[x-1][y-1].Fill(a) 
+from numpy import resize
 
 class ViewGDA:
 
+		
 	def __init__(self,rootfile):
 
 		self.dir = rootfile.mkdir("GDA")
 		self.dir.cd()
-
-		self.hamp= TH1F( 'hamp', 'hamp',1000, 0, 1000 )
-		self.hsum= TH1F( 'hsum', 'hsum',1000, 0, 10000 )
-		self.hsumn= TH2F( 'hsumn', 'hsumn',1000, 0, 10000 ,150, 0, 150)
-		self.hxy = TH2F( 'hxy', 'hxy',11, 1, 12, 11, 1, 12 )
-		self.hxyth = TH2F( 'hxyth', 'hxyth',11, 1, 12, 11, 1, 12 )
-		self.hxymu = TH2F( 'hxymu', 'hxymu',11, 1, 12, 11, 1, 12 )
-
 		
-		ampdir = self.dir.mkdir("AMP")
-		ampdir.cd()
-
-		self.hamps=[]
-		for x in range(1,12):
-			hists = []
-			for y in range(1,12):
-				hists.append(TH1F( 'hamp_%i_%i'%(x,y), 'hamp_%i_%i'%(x,y),1000, 0, 1000 ))
-			self.hamps.append(hists)
-					
 		
+		self.h = TH1F( 'h', 'h',200, 0, 200 )
+		self.h9 = TH1F( 'h9', 'h9',96, 0, 96 )
+		self.h8 = TH1F( 'h8', 'h8',96, 0, 96 )
+		self.h2 = TH2F( 'h2', 'h2',20, 0, 20, 20, 0, 20 )
+		self.h2a = TH2F( 'h2a', 'h2a',20, 0, 20, 20, 0, 20 )
+		self.hmu = TH2F( 'hmu', 'hmu',100, 0, 1000, 100, 0, 1000 )
+		self.hsum = TH1F( 'hsum', 'hsum',100, 0, 5000 )
+		self.hsumc = TH1F( 'hsumc', 'hsumc',100, 0, 1000 )
+		self.hsumch = TH1F( 'hsumch', 'hsumch',100, 0, 1000 )
+		self.hsumch1 = TH1F( 'hsumch1', 'hsumch',100, 0, 1000 )
+		self.hsumch2 = TH1F( 'hsumch2', 'hsumch',100, 0, 1000 )
+		self.hamp = TH1F( 'hamp', 'hamp',100, 0, 1000 )
+		self.h36 = TH1F( 'h36', 'h36',100, 0, 1000 )
+		self.h36g = TH1F( 'h36g', 'h36g',100, 0, 1000 )
+		self.h46 = TH1F( 'h46', 'h46',100, 0, 1000 )
+		self.h45 = TH1F( 'h45', 'h45',100, 0, 1000 )
+		self.h45g = TH1F( 'h45g', 'h45g',100, 0, 1000 )
+		self.h47 = TH1F( 'h47', 'h47',100, 0, 1000 )
+		self.h47g = TH1F( 'h47g', 'h47g',100, 0, 1000 )
+		self.hn20 = TH1F( 'hn20', 'hn20',20, 0, 20 )
+		self.h2n20 = TH2F( 'h2n20', 'h2n20',20, 0, 20, 100, 0, 5000 )
+
+		self.hncl = TH1F( 'hncl', 'hncl',20, 0, 20)
+		self.hecl = TH1F( 'hecl', 'hecl',100, 0, 1000)
+		self.hxy = TH2F( 'hxy', 'hxy',11, 1, 12,11,1,12)
+		self.hkcl = TH1F( 'hkcl', 'hkcl',20, 0, 20)
+
+		self.hncl0 = TH1F( 'hncl0', 'hncl0',20, 0, 20)
+		self.hecl0 = TH1F( 'hecl0', 'hecl0',100, 0, 1000)
+		self.hxy0 = TH2F( 'hxy0', 'hxy0',11, 1, 12,11,1,12)
+		self.hkcl0 = TH1F( 'hkcl0', 'hkcl0',20, 0, 20)
+
+		self.hncl1 = TH1F( 'hncl1', 'hncl1',20, 0, 20)
+		self.hecl1 = TH1F( 'hecl1', 'hecl1',100, 0, 1000)
+		self.hxy1 = TH2F( 'hxy1', 'hxy1',11, 1, 12,11,1,12)
+		self.hkcl1 = TH1F( 'hkcl1', 'hkcl1',20, 0, 20)
+
+
+		self.hxymu = TH2F( 'hxymu', 'hxymu',11, 1, 12,11,1,12)
+		self.heclmu = TH1F( 'heclmu', 'heclmu',100, 0, 1000)
+		self.hxyhad = TH2F( 'hxyhad', 'hxyhad',11, 1, 12,11,1,12)
+		self.heclhad = TH1F( 'heclhad', 'heclhad',100, 0, 1000)
+		self.hxymumu = TH2F( 'hxymumu', 'hxymumu',11, 1, 12,11,1,12)
+		self.heclmumu = TH1F( 'heclmumu', 'heclmumu',100, 0, 1000)
+
 	def Execute(self,event):
-		
-		gda.Decode(event)
-#		print gda
-		sum = 0
-		for x,y,a in gda.hits:
-			self.hamps[x-1][y-1].Fill(a) 
-			self.hamp.Fill(a) 
-			self.hxy.Fill(x,y)
-			if a>50:
-				self.hxyth.Fill(x,y)
-			sum += a
-		self.hsum.Fill(sum)
-		self.hsumn.Fill(sum,len(gda.hits))
-
 		try:
-			mu = event.reco["MU"]
-
-		except KeyError:
-			return
-		
-		for amp in mu:
-			if amp<50:
-				return
+			qdc = event.reco["QDC-2"]
+                        polx = event.reco['h2']
+                        poly = event.reco['h3']
+			
+			gda = []
+			
+			m9 = qdc.moduls[9]
+			for a,e in m9:
+				if e<96:
+					self.h9.Fill(e)
+					e2 = divmod(e,24)
+					enew = e2[0]*24+23-e2[1]
+					gda.append((a,enew))
 				
-		for x,y,a in gda.hits:			
-			if a>50:
-				self.hxymu.Fill(x,y)
+			m8 = qdc.moduls[8]
+			for a,e in m8:
+				if e<96:
+					self.h8.Fill(e)
+					e2 = divmod(e,24)
+					enew = e2[0]*24+ 23 - e2[1] + 96
+					gda.append((a,enew))
+			
+			sum = 0
+			sumc = 0
+			mu = 0
+			cell = 0
+			a36 = 0	
+			a46 = 0	
+			a45 = 0	
+			a47 = 0	
+
+			n20 = 0
+
+			gdam = resize(0,(13,13))
+
+			for a,e in gda:
+				self.h.Fill(e)
+				ix,iy = divmod(e,12)
+				if ix==10:
+					iy = iy + 2
+					
+				if 0<iy<=11 and 0<=ix<11:
+					gdam[ix+1,iy] = a				
+			
+				self.h2.Fill(ix,iy)
+				self.h2a.Fill(ix,iy,a)
+				if ix == 4:
+					if iy == 0:
+						mu = a
+					if iy == 6:
+						cell = a
+				if iy>0:
+					sum += a
+				centr = False
+				if 2<ix<6:
+					if 4<iy<8:
+						sumc += a
+						centr = True
+				if not centr:
+					self.hamp.Fill(a)
+				if ix==3 and iy==6:
+					a36 = a					
+				if ix==4 and iy==6:
+					a46 = a					
+				if ix==4 and iy==5:
+					a45 = a					
+				if ix==4 and iy==7:
+					a47 = a					
+					
+				if a>20:
+					n20 += 1
+					
+			self.hmu.Fill(cell,mu) 
+			self.hsum.Fill(sum) 
+			self.hsumc.Fill(sumc)
+			if len(polx.hits)>0 and len(poly.hits)>0:
+				self.hsumch.Fill(sumc)
+				if mu <50:
+					self.hsumch1.Fill(sumc)
+				else:
+					self.hsumch2.Fill(sumc)
+			
+			
+			
+			if a46>0:
+				self.h46.Fill(a46)
+			if a36>0:
+				self.h36.Fill(a36)
+				if a46<10:
+					self.h36g.Fill(a36)
+			if a45>0:
+				self.h45.Fill(a45)
+				if a46<10:
+					self.h45g.Fill(a45)
+			if a47>0:
+				self.h47.Fill(a47)
+				if a46<10:
+					self.h47g.Fill(a47)
+			self.hn20.Fill(n20)
+			self.h2n20.Fill(n20,sum)
+			
+#			print gdam
+			
+			cl = []
+			for ix in range(1,12):
+				for iy in range(1,12):
+					if gdam[ix,iy]>20 and gdam[ix-1:ix+2,iy-1:iy+2].max()==gdam[ix,iy]:
+						cl.append((ix,iy))
+			
+#			print cl
+
+			self.hncl.Fill(len(cl))
+			if len(polx.hits)==0 and len(poly.hits)==0:
+				self.hncl0.Fill(len(cl))
+			else:
+				self.hncl1.Fill(len(cl))
+				
+			for c in cl:
+				ix = c[0]
+				iy = c[1]
+				sumcl =  gdam[ix-1:ix+1,iy-1:iy+2].sum()
+				self.hecl.Fill(sumcl)			
+				self.hxy.Fill(ix,iy)
+
+				kcl = 0
+				for jx in range(-1,2):				
+					for jy in range(-1,2):
+						if gdam[ix+jx,iy+jy]>20:
+							kcl += 1				
+				self.hkcl.Fill(kcl)
+				
+				if len(polx.hits)==0 and len(poly.hits)==0:
+					self.hecl0.Fill(sumcl)			
+					self.hxy0.Fill(ix,iy)
+					self.hkcl0.Fill(kcl)
+				else:
+					self.hecl1.Fill(sumcl)			
+					self.hxy1.Fill(ix,iy)
+					self.hkcl1.Fill(kcl)
+
+				if kcl<3:
+					self.hxymu.Fill(ix,iy)
+					self.heclmu.Fill(sumcl)			
+				else:
+					self.hxyhad.Fill(ix,iy)
+					self.heclhad.Fill(sumcl)			
+
+				if mu>50:
+					self.hxymumu.Fill(ix,iy)
+					self.heclmumu.Fill(sumcl)			
+						
+				
+		except KeyError:
+			pass
 		
