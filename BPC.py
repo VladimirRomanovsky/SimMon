@@ -193,7 +193,7 @@ class ViewBPC:
 				self.hprofile.Fill(e)
 				self.htime.Fill(e,t)
 				self.htimem[e/64].Fill(t)
-			for h1 in pc.dhits:for i,k in enumerate(decodeBPC4Y):
+			for h1 in pc.dhits:
 				for h2 in pc.dhits:
 					if not h1 == h2:
 					        self.hhh.Fill(h1[1],h2[1])
