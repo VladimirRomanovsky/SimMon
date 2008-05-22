@@ -3,16 +3,23 @@ decode1 = (63,31,61,29,59,27,57,25,55,23,53,21,51,19,49,17,
            47,15,45,13,43,11,41, 9,39, 7,37, 5,35, 3,33, 1,
            62,30,60,28,58,26,56,24,54,22,52,20,50,18,48,16,
            46,14,44,12,42,10,40, 8,38, 6,36, 4,34, 2,32, 0)
-		   
-decode3 = (48,17,50,19,52,21,54,23,56,25,58,27,60,29,62,31,
-           32, 1,34, 3,36, 5,38, 7,40, 9,42,11,44,13,46,15,
-           47,16,49,18,51,20,53,22,55,24,57,26,59,28,61,30,
-           31, 0,33, 2,35, 4,37, 6,39, 8,41,10,43,12,45,14)
 
+decode3 = (48,17,50,19,52,21,54,23,56,25,58,27,60,29,62,31,
+	   32, 1,34, 3,36, 5,38, 7,40, 9,42,11,44,13,46,15,
+	   47,16,49,18,51,20,53,22,55,24,57,26,59,28,61,30,
+	   31, 0,33, 2,35, 4,37, 6,39, 8,41,10,43,12,45,14)
+		   
 decode4 = (49,16,51,18,53,20,55,22,57,24,59,26,61,28,63,30,
            33, 0,35, 2,37, 4,39, 6,41, 8,43,10,45,12,47,14,
            46,17,48,19,50,21,52,23,54,25,56,27,58,29,60,31,
            30, 1,32, 3,34, 5,36, 7,38, 9,40,11,42,13,44,15)
+
+peredec = []
+for a,b,c,d in ((0,1,2,3),(0,1,3,2),(0,2,1,3),(0,2,3,1),(0,3,1,2),(0,3,2,1)):
+    peredec.append((a,b,c,d))
+    peredec.append((b,c,d,a))
+    peredec.append((c,d,a,b))
+    peredec.append((d,a,b,c))
 
 class BPC:
 
@@ -80,7 +87,7 @@ class BPC3X(BPC):
 		
 decodeBPC4X = list(decode1) + [decode1[i]+64 for i in range(64)]  + [decode1[i]+128 for i in range(64)] 
 time3BPC4X = 192*[(55,65,70)]
-badBPC4X = [85,127]
+badBPC4X = []
 class BPC4X(BPC):
 	def __init__(self,event):
 		BPC.__init__(self,event,12,15,18,decodeBPC4X,time3BPC4X,badBPC4X)
@@ -88,7 +95,11 @@ class BPC4X(BPC):
 
 decodeBPC1Y =  [decode1[i]+128 for i in range(64)] + [decode1[i]+64 for i in range(64)] + list(decode1)
 time3BPC1Y = 64*[(65,72,85)] + 64*[(60,75,85)] + 64*[(60,70,80)]
-badBPC1Y = [146,152,178]
+badBPC1Y = [147,153,179]
+ddd = (1,0,3,2)
+for i,k in enumerate(decodeBPC1Y):
+    m,l = divmod(k,4)
+    decodeBPC1Y[i] = m*4+ddd[l]
 class BPC1Y(BPC):
 	def __init__(self,event):
 		BPC.__init__(self,event,10,18,21,decodeBPC1Y,time3BPC1Y,badBPC1Y) 
@@ -97,16 +108,11 @@ class BPC1Y(BPC):
 decodeBPC2Y = [decode4[i]+128 for i in range(64)] + [decode4[i]+64 for i in range(64)] + list(decode4)
 time3BPC2Y = 64*[(50,65,75)] + 64*[(55,65,75)] + 64*[(55,67,80)]
 badBPC2Y = []
+ddd = (2,0,3,1)
 for i,k in enumerate(decodeBPC2Y):
-    if 31<k<64:
-        m,l = divmod(k,2)
-	decodeBPC2Y[i] = m*2+(1-l)
-    if 95<k<128:
-        m,l = divmod(k,2)
-	decodeBPC2Y[i] = m*2+(1-l)
-    if 160<k:
-        m,l = divmod(k,2)
-	decodeBPC2Y[i] = m*2+(1-l)
+    if 31<k<64 or 95<k<128 or 160<k:
+        m,l = divmod(k,4)
+	decodeBPC2Y[i] = m*4+ddd[l]
 class BPC2Y(BPC):
 	def __init__(self,event):
 		BPC.__init__(self,event,10,21,24,decodeBPC2Y,time3BPC2Y,badBPC2Y)
@@ -114,24 +120,18 @@ class BPC2Y(BPC):
 decodeBPC3Y =  [decode3[i]+128 for i in range(64)] + [decode3[i]+64 for i in range(64)] + list(decode3)
 time3BPC3Y = 64*[(60,70,80)] + 64*[(60,70,80)] + 64*[(57,67,80)]
 badBPC3Y = []
-
 class BPC3Y(BPC):
 	def __init__(self,event):
 		BPC.__init__(self,event,12,18,21,decodeBPC3Y,time3BPC3Y,badBPC3Y) 
 
 decodeBPC4Y = [decode4[i]+128 for i in range(64)] + [decode4[i]+64 for i in range(64)] + list(decode4)
 time3BPC4Y = 64*[(55,65,75)] + 64*[(55,67,77)] + 64*[(55,67,80)]
-badBPC4Y = [18]
+badBPC4Y = [18,94]
+ddd = (2,0,3,1)
 for i,k in enumerate(decodeBPC4Y):
-    if 31<k<64:
-        m,l = divmod(k,2)
-	decodeBPC4Y[i] = m*2+(1-l)
-    if 95<k<128:
-        m,l = divmod(k,2)
-	decodeBPC4Y[i] = m*2+(1-l)
-    if 160<k:
-        m,l = divmod(k,2)
-	decodeBPC4Y[i] = m*2+(1-l)	
+    if 31<k<64 or 95<k<128 or 160<k:
+        m,l = divmod(k,4)
+	decodeBPC4Y[i] = m*4+ddd[l]
 class BPC4Y(BPC):
 	def __init__(self,event):
 		BPC.__init__(self,event,12,21,24,decodeBPC4Y,time3BPC4Y,badBPC4Y)
@@ -281,34 +281,93 @@ class ViewBPC:
 			        l2,m2 = divmod(k2,4)
 			        if l1 == l2:
 			            self.h32[i1].Fill(m1,m2)
-					
+
+	class HBPCSimple:
+		def __init__(self,rootfile,name):
+		
+			self.dir = rootfile.mkdir(name)
+			self.dir.cd()
+			
+			self.hprofile = TH1F( 'profile %s'%name, 'profile %s'%name, 192, 0, 192 )
+			self.hdprofile = TH2F( 'dprofile %s'%name, 'dprofile %s'%name, 10, -5, 5, 192, 0, 192 )
+			self.hpered = {}
+			self.hperedpr = {}
+			self.htt = {}
+			for i in range(6):
+			    d = self.dir.mkdir("32_%d"%i)
+			    d.cd()
+			    hpered = []
+			    hperedpr = []
+			    for k in range(len(peredec)):
+			        hpered.append(TH1F( 'd %s'%str(peredec[k]), 'd %s'%str(peredec[k]), 20, -10, 10 ))    
+			        hperedpr.append(TH1F( 'h %s'%str(peredec[k]), 'h %s'%str(peredec[k]), 32, 0, 32 ))    
+			    self.hpered[i] = hpered
+			    self.hperedpr[i] = hperedpr
+			    self.htt[i] = TH2F( 'htt %d'%i, 'dd %d'%i, 128, 0, 128, 128, 0, 128 )
+		def Fill(self,pc):
+		        part =([],[],[],[],[],[])
+			for t,e in pc.dhits:
+			    self.hprofile.Fill(e)
+		            l,m = divmod(e,32)
+			    if l<6:
+			        part[l].append((t,m))
+
+			for ip,p in enumerate(part):
+			    for h in p:
+			        for i,d in enumerate(peredec):
+				    n,k = divmod(h[1],4)
+				    mn = n*4 + d[k]
+				    self.hperedpr[ip][i].Fill(mn)	
+			
+			    for h1 in p:
+			        for h2 in p:
+			            if not h1 == h2:
+					self.htt[ip].Fill(h1[0],h2[0])
+				        t1 = h1[0]
+				        t2 = h2[0]
+					if 50<t1<100 and 50<t2<100:
+				            e1 = h1[1]
+				            e2 = h2[1]
+				            for i,d in enumerate(peredec):
+					        n1,k1 = divmod(e1,4)
+					        m1n = n1*4 + d[k1]
+					        n2,k2 = divmod(e2,4)
+					        m2n = n2*4 + d[k2]
+				                self.hpered[ip][i].Fill(m1n-m2n)	
 	def __init__(self,rootfile):
 
 		self.dir = rootfile.mkdir("BPC")
 		self.dir.cd()
 
-		self.hbpc3x = self.HBPC(self.dir, "BPC3X")
-		self.hbpc4x = self.HBPC(self.dir, "BPC4X")
-		self.hbpc1y = self.HBPC(self.dir, "BPC1Y")
-		self.hbpc2y = self.HBPC(self.dir, "BPC2Y")
-		self.hbpc3y = self.HBPC(self.dir, "BPC3Y")
-		self.hbpc4y = self.HBPC(self.dir, "BPC4Y")
+	        self.hbpc3x = self.HBPC(self.dir, "BPC3X")
+	        self.hbpc4x = self.HBPC(self.dir, "BPC4X")
+	        self.hbpc1y = self.HBPC(self.dir, "BPC1Y")
+	        self.hbpc2y = self.HBPC(self.dir, "BPC2Y")
+	        self.hbpc3y = self.HBPC(self.dir, "BPC3Y")
+	        self.hbpc4y = self.HBPC(self.dir, "BPC4Y")
 
-		self.hbpc3x4x = self.HBPC2(self.dir, "BPC3X4X")
+	        self.hbpc3x4x = self.HBPC2(self.dir, "BPC3X4X")
 
-		self.hbpc1y2y = self.HBPC2(self.dir, "BPC1Y2Y")
-		self.hbpc1y3y = self.HBPC2(self.dir, "BPC1Y3Y")
-		self.hbpc1y4y = self.HBPC2(self.dir, "BPC1Y4Y")
-		self.hbpc2y3y = self.HBPC2(self.dir, "BPC2Y3Y")
-		self.hbpc2y4y = self.HBPC2(self.dir, "BPC2Y4Y")
-		self.hbpc3y4y = self.HBPC2(self.dir, "BPC3Y4Y")
+	        self.hbpc1y2y = self.HBPC2(self.dir, "BPC1Y2Y")
+	        self.hbpc1y3y = self.HBPC2(self.dir, "BPC1Y3Y")
+	        self.hbpc1y4y = self.HBPC2(self.dir, "BPC1Y4Y")
+	        self.hbpc2y3y = self.HBPC2(self.dir, "BPC2Y3Y")
+	        self.hbpc2y4y = self.HBPC2(self.dir, "BPC2Y4Y")
+ 	        self.hbpc3y4y = self.HBPC2(self.dir, "BPC3Y4Y")
 
-		self.hbpctest1y = self.HBPCTest(self.dir, "1Y")
-		self.hbpctest2y = self.HBPCTest(self.dir, "2Y")
-		self.hbpctest3y = self.HBPCTest(self.dir, "3Y")
-		self.hbpctest4y = self.HBPCTest(self.dir, "4Y")
-		self.hbpctest3x = self.HBPCTest(self.dir, "3X")
-		self.hbpctest4x = self.HBPCTest(self.dir, "4X")
+#		self.hbpctest1y = self.HBPCTest(self.dir, "T1Y")
+#		self.hbpctest2y = self.HBPCTest(self.dir, "T2Y")
+#		self.hbpctest3y = self.HBPCTest(self.dir, "T3Y")
+#		self.hbpctest4y = self.HBPCTest(self.dir, "T4Y")
+#		self.hbpctest3x = self.HBPCTest(self.dir, "T3X")
+#		self.hbpctest4x = self.HBPCTest(self.dir, "T4X")
+
+#		self.hbpcsimple1y = self.HBPCSimple(self.dir, "1Y")
+#		self.hbpcsimple2y = self.HBPCSimple(self.dir, "2Y")
+#		self.hbpcsimple3y = self.HBPCSimple(self.dir, "3Y")
+#		self.hbpcsimple4y = self.HBPCSimple(self.dir, "4Y")
+#		self.hbpcsimple3x = self.HBPCSimple(self.dir, "3X")
+#		self.hbpcsimple4x = self.HBPCSimple(self.dir, "4X")
 
 	def Execute(self,event):
 				
@@ -342,9 +401,16 @@ class ViewBPC:
 		self.hbpc2y4y.Fill(bpc2y,bpc4y)
 		self.hbpc3y4y.Fill(bpc3y,bpc4y)
 		
-		self.hbpctest1y.Fill(bpc1y)
-		self.hbpctest2y.Fill(bpc2y)
-		self.hbpctest3y.Fill(bpc3y)
-		self.hbpctest4y.Fill(bpc4y)
-		self.hbpctest3x.Fill(bpc3x)
-		self.hbpctest4x.Fill(bpc4x)
+#		self.hbpctest1y.Fill(bpc1y)
+#		self.hbpctest2y.Fill(bpc2y)
+#		self.hbpctest3y.Fill(bpc3y)
+#		self.hbpctest4y.Fill(bpc4y)
+#		self.hbpctest3x.Fill(bpc3x)
+#		self.hbpctest4x.Fill(bpc4x)
+
+#		self.hbpcsimple1y.Fill(bpc1y)
+#		self.hbpcsimple2y.Fill(bpc2y)
+#		self.hbpcsimple3y.Fill(bpc3y)
+#		self.hbpcsimple4y.Fill(bpc4y)
+#		self.hbpcsimple3x.Fill(bpc3x)
+#		self.hbpcsimple4x.Fill(bpc4x)

@@ -4,12 +4,12 @@ class LE76:
 	def __init__(self,data):
 	
 		self.data = data
-		
+                self.reg = {}
+
 		if len(data)!=data[0]:
 			print "LE76:: Error in leng: %i %i "%(len(data),data[0])
 			return
 			
-		self.reg = {}
 		k = 2
 		while k+8<=data[0]:
 
@@ -159,6 +159,8 @@ class ViewHodos:
 		self.h1y2y = TH2F( ' H1Y H2Y', 'H1Y H2Y', 16, 0, 16, 48, 0, 48 )
 		self.h1y3y = TH2F( ' H1Y H3Y', 'H1Y H3Y', 16, 0, 16, 32, 0, 32 )
 		self.h2y3y = TH2F( ' H2Y H3Y', 'H2Y H3Y', 48, 0, 48, 32, 0, 32 )
+		self.h2ys4y = TH2F( ' H2Y HS4Y', 'H2Y HS4Y', 48, 0, 48, 16, 0, 16 )
+		self.hs3xs4x = TH2F( ' HS3X HS4X', 'HS3X HS4X', 16, 0, 16, 16, 0, 16 )
 
 		self.h1y2y3y = TH3F( ' H1Y H2Y H3Y', 'H1Y H2Y H3Y', 16, 0, 16, 48, 0, 48, 32, 0, 32 )
 		
@@ -168,9 +170,9 @@ class ViewHodos:
 		self.hists["H3Y"] = self.HodosHist(self.dir,"H3Y",32)
 		self.hists["H2X"] = self.HodosHist(self.dir,"H2X",48)
 		self.hists["H2Y"] = self.HodosHist(self.dir,"H2Y",48)
-		self.hists["HSX"] = self.HodosHist(self.dir,"HSX",16)
-		self.hists["HSY"] = self.HodosHist(self.dir,"HSY",16)
-		self.hists["HSZ"] = self.HodosHist(self.dir,"HSZ",16)
+		self.hists["HS4Y"] = self.HodosHist(self.dir,"HS4Y",16)
+		self.hists["HS4X"] = self.HodosHist(self.dir,"HS4X",16)
+		self.hists["HS3X"] = self.HodosHist(self.dir,"HS3X",16)
 		
 		
 
@@ -219,9 +221,9 @@ class ViewHodos:
 		except KeyError:
 			pass
 		else:
-			hodos["HSX"] = HSTRIP(reg[0:1])
-			hodos["HSY"] = HSTRIP(reg[1:2])
-			hodos["HSZ"] = HSTRIP(reg[2:3])
+                        hodos["HS4Y"] = HSTRIP(reg[0:1])
+                        hodos["HS4X"] = HSTRIP(reg[1:2])
+                        hodos["HS3X"] = HSTRIP(reg[2:3])
 
 
 		for h in hodos.keys():
@@ -266,6 +268,24 @@ class ViewHodos:
 			for h2 in h2y.hits:
 				for h3 in h3y.hits:
 					self.h2y3y.Fill(h2,h3)
+		try:
+			h2y = hodos["H2Y"]
+			hs4y = hodos["HS4Y"]
+		except:
+			pass
+		else:
+			for h2 in h2y.hits:
+				for hs4 in hs4y.hits:
+					self.h2ys4y.Fill(h2,hs4)
+		try:
+			hs3x = hodos["HS3X"]
+			hs4x = hodos["HS4X"]
+		except:
+			pass
+		else:
+			for h3 in hs3x.hits:
+				for h4 in hs4x.hits:
+					self.hs3xs4x.Fill(h3,h4)
 			
 		try:
 			h1y = hodos["H1Y"]
