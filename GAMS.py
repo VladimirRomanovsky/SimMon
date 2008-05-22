@@ -1,7 +1,6 @@
 from ROOT import TH1F,TH2F
 
 from numpy import zeros
-from utils import *
 from copy import deepcopy
 
 class ViewGAMS:

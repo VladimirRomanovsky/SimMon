@@ -15,10 +15,6 @@ from LE76 import *
 from LE78 import *
 from QDC import *
 from TDC import *
-from WideHead import *
-from Drift import *
-from PIM import *
-from BC import *
 from BPC import *
 from DT78 import *
 from SG import *
@@ -26,6 +22,7 @@ from GDA import *
 from GAMS import *
 from BGD import *
 from PC import *
+from Shift import *
 
 from ROOT import TBrowser,TFile
 
@@ -90,7 +87,7 @@ methlist.append(Stat(f))
 #methlist.append(DecodeQDC(3))
 #methlist.append(DecodeTDC())
 
-#methlist.append(DecodeLE76())
+methlist.append(DecodeLE76())
 
 methlist.append(DecodeLE78(10))
 methlist.append(DecodeLE78(11))
@@ -115,6 +112,8 @@ methlist.append(ViewPC(f))
 #methlist.append(ViewGDA(f))
 #methlist.append(ViewGAMS(f))
 #methlist.append(ViewBGD(f))
+methlist.append(Select())
+methlist.append(Shift(f))
 
 ESmethlist = []
 #ESmethlist.append(DecodeQDC(2))
