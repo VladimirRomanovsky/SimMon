@@ -10,8 +10,8 @@ class QDC:
 		self.hits = []
 		self.moduls = {}
 		
-		k = 2
-		nhit = data[0]/2-1
+		k = 2 + 6
+		nhit = data[0]/2-1 - 3
 
 		if len(data)!= data[0]:
 			return	
@@ -38,7 +38,53 @@ class DecodeQDC:
 		
 		try:
 			data = event.det[self.crate]
+			#print data
 			qdc = QDC(data)
+			event.reco["QDC-%i"%self.crate]=qdc
+			
+		except 	KeyError:
+			pass
+
+class QDCLED:
+	" Decode QDC from OKA2006 DATA"
+
+	
+	def __init__(self,data):
+
+		self.data = data
+		self.hits = []
+		self.moduls = {}
+		
+		k = 2
+		nhit = data[0]/2-1
+
+		if len(data)!= data[0]:
+			return	
+		
+		for i in range(nhit):
+			self.hits.append(data[k:k+2])
+			k += 2
+
+		try:
+			for a,e in self.hits:
+				mod = e>>7
+				ent = e&0x7F
+				self.moduls.setdefault(mod,[]).append((a,ent))
+		except ValueError:
+			pass	
+
+class DecodeQDCLED:
+
+	def __init__(self,cr):
+
+		self.crate = cr					
+
+	def Execute(self,event):
+		
+		try:
+			data = event.det[self.crate]
+			#print data
+			qdc = QDCLED(data)
 			event.reco["QDC-%i"%self.crate]=qdc
 			
 		except 	KeyError:

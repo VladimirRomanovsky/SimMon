@@ -1,6 +1,10 @@
 #! /bin/env python
 '''
 '''
+
+import sys
+#sys.path.append("/home.local/daqop/users/roma/lib/python2.4/site-packages")
+
 from ctypes import *
 
 from time import localtime,strftime
@@ -27,6 +31,7 @@ from SG import *
 from GDA import *
 from GAMS import *
 from BGD import *
+from QDCMix import *
 
 from ROOT import TBrowser,TFile
 
@@ -54,14 +59,18 @@ To STOP it - press ^C
 
 	
 size = 1024*8
+#d = "/".join(__file__.split("/")[:-1])
+#lib = CDLL(d+"/datemon.so")
+#status = lib.date_init(arg)
+#print "Status %d"%status
 
-lib = CDLL("datemon.so")
+lib = CDLL("/date/monitoring/Linux/libmonitor.so")
 
-
-status = lib.date_init(arg)
-
-
+status = lib.monitorDeclareMp("SimMon")
 print "Status %d"%status
+status = lib.monitorSetDataSource(arg)
+print "Status %d"%status
+
 
 buff_type = c_ushort*size
 
@@ -110,26 +119,34 @@ methlist.append(DecodeQDC(3))
 #methlist.append(ViewHodoscopes(f))
 #methlist.append(ViewBC(f))
 #methlist.append(ViewDT(f))
+methlist.append(ViewGDA(f))
 methlist.append(ViewSG(f))
-#methlist.append(ViewGDA(f))
 methlist.append(ViewGAMS(f))
 methlist.append(ViewBGD(f))
+methlist.append(ViewQDCMix(f))
 
 ESmethlist = []
-ESmethlist.append(DecodeQDC(2))
-ESmethlist.append(DecodeQDC(3))
+ESmethlist.append(DecodeQDCLED(2))
+ESmethlist.append(DecodeQDCLED(3))
 ESmethlist.append(ViewBGD_LED(f))
+ESmethlist.append(ViewGDA_LED(f))
 
 BS = BegSpill(f)
 
 b = TBrowser()
 
+skip_error = (0x400000,)
+
 try:
 	while True:
-		status = lib.date_getevent(byref(buff),size*2)
+#		status = lib.date_getevent(byref(buff),size*2)
+		status = lib.monitorGetEvent(byref(buff),size*2)
 		if status:
 			print "Status %x"%(status&0x3FFFFFFF)
-			break
+                        if status&0x3FFFFFFF in skip_error:
+                            continue
+                        else:
+                            break
 	
 		event = Event(buff)
 #		print "Type of ev. %d"%event.Type()

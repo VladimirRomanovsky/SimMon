@@ -10,8 +10,13 @@ decodeY = [31,63,29,61,27,59,25,57,23,55,21,53,19,51,17,49,
 	   30,62,28,60,26,58,24,56,22,54,20,52,18,50,16,48,
 	   14,46,12,44,10,42, 8,40, 6,38, 4,36, 2,34, 0,32]
 
-tleft = 50
-tright = 70
+decodeY1 = [30,62,28,60,26,58,24,56,22,54,20,52,18,50,16,48,
+	    14,46,12,44,10,42, 8,40, 6,38, 4,36, 2,34, 0,32,
+	    31,63,29,61,27,59,25,57,23,55,21,53,19,51,17,49,
+            15,47,13,45,11,43, 9,41, 7,39, 5,37, 3,35, 1,33]
+
+tleft = 70
+tright = 100
 
 class ViewPC:
 
@@ -19,7 +24,7 @@ class ViewPC:
 	class PC:
 	
 
-		def __init__(self,event,cr,rfirst,rlast,decode):
+		def __init__(self,event,cr,rlist,decode):
 		
 			self.hits = []
 			self.cls = []
@@ -29,8 +34,9 @@ class ViewPC:
 			
 			except KeyError:
 				return
-
-			for im in range(rfirst,rlast):
+			km = -1
+			for im in rlist:
+				km += 1
 				try:
 					m = le78.moduls[im]
 				except KeyError:
@@ -38,7 +44,7 @@ class ViewPC:
 			
 				for t,e in m:
 					ed = decode[e]
-					hit = (t,ed+(im-rfirst)*64)
+					hit = (t,ed+km*64)
 					self.hits.append(hit)
 					
 			self.hits.sort(lambda x,y: cmp(x[1], y[1]))
@@ -59,26 +65,6 @@ class ViewPC:
 #			print self.hits
 #			print self.cls
 			 
-	class PC2:
-	
-
-		def __init__(self,event,name1,name2):
-		
-			self.hits = []
-		
-			try:
-				pc1 = event.reco[name1]
-				pc2 = event.reco[name2]
-			
-			except KeyError:
-				return
-
-			for t1,e1 in pc1.hits:
-			    if tleft<t1<tright:
-			        for t2,e2 in pc2.hits:
-			            if tleft<t2<tright:
-					if -30<(e1-e2)<0:
-					    self.hits.append((e1+e2)/2)
 				
 
 	class HPC:
@@ -89,8 +75,8 @@ class ViewPC:
 			self.hprofile = TH1F( 'profile %s'%name, 'profile %s'%name, size, 0, size )
 			self.hprofile2 = TH2F( 'profile2 %s'%name, 'profile2 %s'%name, size, 0, size ,size, 0, size )
 			self.hd = TH2F( 'd %s'%name, 'd %s'%name, 10, -5, 5, size, 0, size )
-			self.htime = TH1F( 'time %s'%name, 'time %s'%name, 128, 0, 128 )
-			self.hprofiletime = TH2F( 'profiletime %s'%name, 'time %s'%name, size, 0, size, 128, 0, 128 )
+			self.htime = TH1F( 'time %s'%name, 'time %s'%name, 256, 0, 256 )
+			self.hprofiletime = TH2F( 'profiletime %s'%name, 'time %s'%name, size, 0, size, 256, 0, 256 )
 			self.hprofilet = TH1F( 'profileT %s'%name, 'profileT %s'%name, size, 0, size )
 			self.hprofilet1 = TH1F( 'profileT_even %s'%name, 'profileT1 %s'%name, size/2, 0, size/2 )
 			self.hprofilet2 = TH1F( 'profileT_odd %s'%name, 'profileT2 %s'%name, size/2, 0, size/2 )
@@ -98,9 +84,9 @@ class ViewPC:
 			self.dir.mkdir("Cluster").cd()
 			self.hclmult = TH1F( 'clmult %s'%name, 'Cl mult %s'%name, 32, 0, 32 )
 			self.hclleng = TH1F( 'clleng %s'%name, 'Cl leng %s'%name, 32, 0, 32 )
-			self.ht30 = TH1F( 't30 %s'%name, 'Cl t30 %s'%name, 128, 0, 128 )
-			self.ht31 = TH1F( 't31 %s'%name, 'Cl t31 %s'%name, 128, 0, 128 )
-			self.ht32 = TH1F( 't32 %s'%name, 'Cl t32 %s'%name, 128, 0, 128 )
+			self.ht30 = TH1F( 't30 %s'%name, 'Cl t30 %s'%name, 256, 0, 256 )
+			self.ht31 = TH1F( 't31 %s'%name, 'Cl t31 %s'%name, 256, 0, 256 )
+			self.ht32 = TH1F( 't32 %s'%name, 'Cl t32 %s'%name, 256, 0, 256 )
 			
 			
 		def Fill(self,pc):
@@ -150,21 +136,6 @@ class ViewPC:
 					if -30<(e1-e2)<0:
 					    self.h2.Fill((e1+e2)/2)
 			
-	class HPCM:
-	
-		def __init__(self,rootfile,size1,name):
-			self.dir = rootfile.mkdir(name)
-			self.dir.cd()
-			self.h = TH2F( '%s'%name, '%s'%name, size1, 0, size1, 8, 0, 8 )
-			
-		def Fill(self,pc,hm):
-			for t,e in pc.hits:
-			    if tleft<t<tright:
-				
-			        for coor in hm:
-					self.h.Fill(e,coor)
-					
-					
 								
 	def __init__(self,rootfile):
 
@@ -173,58 +144,54 @@ class ViewPC:
 		
 		self.hpcx2 = self.HPC(self.dir,64*10,"X2")
 		self.hpcx3 = self.HPC(self.dir,64*10,"X3")
+		self.hpcx4 = self.HPC(self.dir,64*10,"X4")
+		self.hpcy1 = self.HPC(self.dir,64*7,"Y1")
 		self.hpcy2 = self.HPC(self.dir,64*7,"Y2")
 		self.hpcy3 = self.HPC(self.dir,64*7,"Y3")
 		
-		self.hpcxx = self.HPC2(self.dir,64*10,64*10,"X2 X3")
-		self.hpcyy = self.HPC2(self.dir,64*7,64*7,"Y2 Y3")
+		self.hpcx2x3 = self.HPC2(self.dir,64*10,64*10,"X2 X3")
+		self.hpcx2x4 = self.HPC2(self.dir,64*10,64*10,"X2 X4")
+		self.hpcx3x4 = self.HPC2(self.dir,64*10,64*10,"X3 X4")
+
+		self.hpcy1y2 = self.HPC2(self.dir,64*7,64*7,"Y1 Y2")
+		self.hpcy1y3 = self.HPC2(self.dir,64*7,64*7,"Y1 Y3")
+		self.hpcy2y3 = self.HPC2(self.dir,64*7,64*7,"Y2 Y3")
 		
-		self.hpcx2m = self.HPCM(self.dir,64*10,"X2M")
-		self.hpcx3m = self.HPCM(self.dir,64*10,"X3M")
-		self.hpcy2m = self.HPCM(self.dir,64*7,"Y2M")
-		self.hpcy3m = self.HPCM(self.dir,64*7,"Y3M")
 
 	def Execute(self,event):
 		
-		pcx2 = self.PC(event,11,14,24,decodeX)
+		pcx2 = self.PC(event,11,(14,15,16,17,18,19,20,21,22,23),decodeX)
 		self.hpcx2.Fill(pcx2)	
 
-		pcx3 = self.PC(event,13,4,14,decodeX)
+		pcx3 = self.PC(event,13,(4,5,6,7,8,9,10,11,12,13),decodeX)
 		self.hpcx3.Fill(pcx3)	
 
-		pcy2 = self.PC(event,10,11,18,decodeY)
+		pcx4 = self.PC(event,13,(14,15,16,17,18,19,20,21,22,23),decodeX)
+		self.hpcx4.Fill(pcx4)	
+
+		pcy1 = self.PC(event,11,(10,9,8,7,6,5,4),decodeY1)
+		self.hpcy1.Fill(pcy1)	
+
+		pcy2 = self.PC(event,10,(11,12,13,14,15,16,17),decodeY)
 		self.hpcy2.Fill(pcy2)	
 		
-		pcy3 = self.PC(event,12,4,11,decodeY)
+		pcy3 = self.PC(event,12,(4,5,6,7,8,9,10),decodeY)
 		self.hpcy3.Fill(pcy3)	
 
 
 		event.reco["PCX2"] = pcx2
 		event.reco["PCX3"] = pcx3
+		event.reco["PCX4"] = pcx4
+		
+		event.reco["PCY1"] = pcy1
 		event.reco["PCY2"] = pcy2
 		event.reco["PCY3"] = pcy3
 
-		self.hpcxx.Fill(pcx2,pcx3)
-		self.hpcyy.Fill(pcy2,pcy3)
+		self.hpcx2x3.Fill(pcx2,pcx3)
+		self.hpcx2x4.Fill(pcx2,pcx4)
+		self.hpcx3x4.Fill(pcx3,pcx4)
 
-		pcx2x3 = self.PC2(event,"PCX2","PCX3")
-		event.reco["PCX2X3"] = pcx2x3
-		pcy2y3 = self.PC2(event,"PCY2","PCY3")
-		event.reco["PCY2Y3"] = pcy2y3
+		self.hpcy1y2.Fill(pcy1,pcy2)
+		self.hpcy1y3.Fill(pcy1,pcy3)
+		self.hpcy2y3.Fill(pcy2,pcy3)
 		
-		try:
-		    hm = event.reco["Matrix"]	
-		except KeyError:
-		    return
-		    
-		xs = []
-		ys = []
-	    
-		for x,y,t in hm:
-		    xs.append(x)
-		    ys.append(y)
-		
-		self.hpcx2m.Fill(pcx2,xs)
-		self.hpcx3m.Fill(pcx3,xs)
-		self.hpcy2m.Fill(pcy2,ys)
-		self.hpcy3m.Fill(pcy3,ys)

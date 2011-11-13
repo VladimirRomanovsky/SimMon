@@ -29,7 +29,7 @@ class LE78:
 			return
 			
 		rawmoduls = {}
-		for i in range(1,data[0]/2):
+		for i in range(1+3,data[0]/2): # Skip 6 words
 			info = data[i*2]
 			modul = data[i*2+1]>>6
 
@@ -52,11 +52,12 @@ class LE78:
 			d = self.rawmoduls[i]
 			mod = None
 			if len(d)!=d[0]+1:
-				continue 		
-			if d[1]!=i:
+				continue			
+			if len(d)<2 or d[1]!=i:
 				continue
 			if nev:
 				if nev!=(d[-1]&0x3FFF):
+					print "Error in NEV:",data[1],i,nev,d[-1]&0x3FFF,"%x"%(nev-d[-1]&0x3FFF)
 					continue
 			else:
 				nev = (d[-1]&0x3FFF)
@@ -67,7 +68,7 @@ class LE78:
 			if d[0]>2:
 				for k in d[2:-1]:
 					if k>>14 != 0:
-						break
+						continue
 					hits.append((k&0xFF,(k>>8)&0x3F))
 
 #					if (k&0xFF) == i and ((k>>8)&0x3F) == 0:
@@ -123,11 +124,11 @@ class ViewLE78:
 		self.hlen={}
 		for i in range(4,24):
 			name = "time-%02d"%i
-			self.h1[i] = TH1F( name, name, 128, 0, 128 )
+			self.h1[i] = TH1F( name, name, 256, 0, 256 )
 			name = "profile-%02d"%i
 			self.h2[i] = TH1F( name, name, 64, 0, 64 )
-			name = "profile-%02d_T"%i
-			self.h3[i] = TH1F( name, name, 64, 0, 64 )
+			name = "profile-time-%02d"%i
+			self.h3[i] = TH2F( name, name, 256, 0, 256, 64, 0, 64 )
 			name = "Leng-%02d"%i
 			self.hlen[i] = TH1F( name, name, 100, 0, 100 )
 		self.hmod = {}
@@ -136,7 +137,7 @@ class ViewLE78:
 			di.cd()
 			hlist = []
 			for k in range(64):
-				hlist.append(TH1F( "Time%02d"%k, "Time%02d"%k, 128, 0, 128 ))
+				hlist.append(TH1F( "Time%02d"%k, "Time%02d"%k, 256, 0, 256 ))
 			self.hmod[i] = hlist
 			
 
@@ -169,7 +170,6 @@ class ViewLE78:
 				for t,e in m:
 					self.h1[i].Fill(t)
 					self.h2[i].Fill(e)
-					if 50<t<100:
-						self.h3[i].Fill(e)
+					self.h3[i].Fill(t,e)
 					hl[e].Fill(t)
 					

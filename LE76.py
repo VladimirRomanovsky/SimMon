@@ -4,15 +4,21 @@ class LE76:
 	def __init__(self,data):
 	
 		self.data = data
-                self.reg = {}
-
+		
 		if len(data)!=data[0]:
 			print "LE76:: Error in leng: %i %i "%(len(data),data[0])
 			return
 			
-		k = 2
+		self.reg = {}
+#		k = 62 #Added 20 words for 1 Scaler
+#		k = 2 + 3*20 + 2*6
+		k = 2 + 3*68 + 2*6
+#                print "LE76:",
+#		for pp in data[k:]:
+#			print "%04x"%pp,
+#		print " "
 		while k+8<=data[0]:
-
+                        
 			n = 0
 			for e in range(4):
 				na = data[k+2*e+1]
@@ -22,13 +28,16 @@ class LE76:
 					r = []
 #					print n
 				if na>>6 != n:
+					print "LE76 ERROR"
 					break
 				
 				d = data[k+2*e]
 				r.append(d)			
 				
 			if len(r)==4:
-				self.reg[n] = r					
+				self.reg[n] = r
+			else:
+				print "LE76 ERROR leng "		
 			k += 8
 #		print self.reg
 
@@ -62,7 +71,6 @@ class HODOSCOPE:
 			for i in range(16):
 				k = (d>>i)&0x1
 				if k:
-				    if not self.decode[j*16+i] is None:
 					self.hits.append(self.decode[j*16+i])
 
 		self.hits.sort()
@@ -105,12 +113,15 @@ decode3 = range(15,-1,-1) + range(31,15,-1)
 class H3Y(HODOSCOPE):
 	def __init__(self,data):
 		HODOSCOPE.__init__(self, decode3, data)
+class H3X(HODOSCOPE):
+	def __init__(self,data):
+		HODOSCOPE.__init__(self, decode3, data)
 
 G_decode = (0,15,1,14,2,13,3,12,4,11,5,10,6,9,7,8)
-G_decode_2x = (0,1,15,14,2,13,3,12,4,11,5,10,6,9,7,8)
-decode2x = [15-i for i in G_decode_2x] + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
-decode2x[42] = None
-decode2y = list(G_decode) + [i+16 for i in G_decode]+ [i+32 for i in G_decode]
+G_decode_x2 = (0,1,15,14,2,13,3,12,4,11,5,10,6,9,7,8)
+G_decode_per = (0,15,1,4,2,13,3,12,14,11,5,10,6,9,7,8)
+decode2x = [i+32 for i in G_decode] + [i+16 for i in G_decode] + [i for i in G_decode]
+decode2y = [i for i in G_decode] + [i+16 for i in G_decode] + [i+32 for i in G_decode]
 
 class H2X(HODOSCOPE):
 	def __init__(self,data):
@@ -119,7 +130,11 @@ class H2X(HODOSCOPE):
 class H2Y(HODOSCOPE):
 	def __init__(self,data):
 		HODOSCOPE.__init__(self, decode2y,data)
-
+		
+decode64 = [i for i in A_decode] + [i+16 for i in A_decode] + [i+32 for i in A_decode] + [i+48 for i in A_decode]
+class H64(HODOSCOPE):
+	def __init__(self,data):
+		HODOSCOPE.__init__(self, decode64,data)
 
 class ViewHodos:
 	class HodosHist:
@@ -155,26 +170,15 @@ class ViewHodos:
 		self.dir = rootfile.mkdir("Hodos")
 		self.dir.cd()
 
-		self.h1x2x = TH2F( ' H1X H2X', 'H1X H2X', 16, 0, 16, 48, 0, 48 )
-		self.h1y2y = TH2F( ' H1Y H2Y', 'H1Y H2Y', 16, 0, 16, 48, 0, 48 )
-		self.h1y3y = TH2F( ' H1Y H3Y', 'H1Y H3Y', 16, 0, 16, 32, 0, 32 )
-		self.h2y3y = TH2F( ' H2Y H3Y', 'H2Y H3Y', 48, 0, 48, 32, 0, 32 )
-		self.h2ys4y = TH2F( ' H2Y HS4Y', 'H2Y HS4Y', 48, 0, 48, 16, 0, 16 )
-		self.hs3xs4x = TH2F( ' HS3X HS4X', 'HS3X HS4X', 16, 0, 16, 16, 0, 16 )
+		self.hr = TH1F( 'LE76', 'LE76',32, 0, 32 )
 
-		self.h1y2y3y = TH3F( ' H1Y H2Y H3Y', 'H1Y H2Y H3Y', 16, 0, 16, 48, 0, 48, 32, 0, 32 )
-		
 		self.hists = {}
-		self.hists["H1X"] = self.HodosHist(self.dir,"H1X",16)
-		self.hists["H1Y"] = self.HodosHist(self.dir,"H1Y",16)
-		self.hists["H3Y"] = self.HodosHist(self.dir,"H3Y",32)
-		self.hists["H2X"] = self.HodosHist(self.dir,"H2X",48)
-		self.hists["H2Y"] = self.HodosHist(self.dir,"H2Y",48)
-		self.hists["HS4Y"] = self.HodosHist(self.dir,"HS4Y",16)
-		self.hists["HS4X"] = self.HodosHist(self.dir,"HS4X",16)
-		self.hists["HS3X"] = self.HodosHist(self.dir,"HS3X",16)
-		
-		
+		self.hists["H1"] = self.HodosHist(self.dir,"H1",16)
+		self.hists["H2"] = self.HodosHist(self.dir,"H2",16)
+		self.hists["H2X"] = self.HodosHist(self.dir,"H3",48)
+		self.hists["H4"] = self.HodosHist(self.dir,"H4",16)
+		self.hists["H5"] = self.HodosHist(self.dir,"H5",16)
+		self.hists["H2Y"] = self.HodosHist(self.dir,"H6",48)
 
 	def Execute(self,event):
 		
@@ -185,119 +189,63 @@ class ViewHodos:
 			
 		except 	KeyError:
 			return
-
 		
-		try:
-			reg = le76.reg[6]
-		except KeyError:
-			pass
-		else:
-			hodos["H1X"] = H1X(reg[0:1])
-			hodos["H1Y"] = H1Y(reg[1:2])
-
+		self.hr.Fill(0)
+		for i in le76.reg.keys():
+			self.hr.Fill(i)
+		
 		try:
 			reg = le76.reg[1]
 		except KeyError:
 			pass
 		else:
-			hodos["H3Y"] = H3Y(reg[0:2])
+			hodos["H1"] = H64(reg[0:4])
 
 		try:
 			reg = le76.reg[2]
 		except KeyError:
 			pass
 		else:
-			hodos["H2X"] = H2X(reg[0:3])
+			hodos["H2"] = H64(reg[0:4])
 
 		try:
 			reg = le76.reg[3]
 		except KeyError:
 			pass
 		else:
-			hodos["H2Y"] = H2Y(reg[0:3])
+			hodos["H2X"] = H2X(reg[0:3])
+			event.reco["H2X"] = hodos["H2X"]
 
 		try:
 			reg = le76.reg[4]
 		except KeyError:
 			pass
 		else:
-                        hodos["HS4Y"] = HSTRIP(reg[0:1])
-                        hodos["HS4X"] = HSTRIP(reg[1:2])
-                        hodos["HS3X"] = HSTRIP(reg[2:3])
-
-
-		for h in hodos.keys():
-			self.hists[h].Fill(hodos[h])
+			hodos["H4"] = H64(reg[0:4])
 
 		try:
-			h1x = hodos["H1X"]
-			h2x = hodos["H2X"]
-		except:
+			reg = le76.reg[5]
+		except KeyError:
 			pass
 		else:
-			for h1 in h1x.hits:
-				for h2 in h2x.hits:
-					self.h1x2x.Fill(h1,h2)
-			
+			hodos["H5"] = H64(reg[0:4])
+
 		try:
-			h1y = hodos["H1Y"]
-			h2y = hodos["H2Y"]
-		except:
+			reg = le76.reg[6]
+		except KeyError:
 			pass
 		else:
-			for h1 in h1y.hits:
-				for h2 in h2y.hits:
-					self.h1y2y.Fill(h1,h2)
-			
-		try:
-			h1y = hodos["H1Y"]
-			h3y = hodos["H3Y"]
-		except:
-			pass
-		else:
-			for h1 in h1y.hits:
-				for h3 in h3y.hits:
-					self.h1y3y.Fill(h1,h3)
-			
-		try:
-			h2y = hodos["H2Y"]
-			h3y = hodos["H3Y"]
-		except:
-			pass
-		else:
-			for h2 in h2y.hits:
-				for h3 in h3y.hits:
-					self.h2y3y.Fill(h2,h3)
-		try:
-			h2y = hodos["H2Y"]
-			hs4y = hodos["HS4Y"]
-		except:
-			pass
-		else:
-			for h2 in h2y.hits:
-				for hs4 in hs4y.hits:
-					self.h2ys4y.Fill(h2,hs4)
-		try:
-			hs3x = hodos["HS3X"]
-			hs4x = hodos["HS4X"]
-		except:
-			pass
-		else:
-			for h3 in hs3x.hits:
-				for h4 in hs4x.hits:
-					self.hs3xs4x.Fill(h3,h4)
-			
-		try:
-			h1y = hodos["H1Y"]
-			h2y = hodos["H2Y"]
-			h3y = hodos["H3Y"]
-		except:
-			pass
-		else:
-			for h1 in h1y.hits:
-				for h2 in h2y.hits:
-					for h3 in h3y.hits:
-						self.h1y2y3y.Fill(h1,h2,h3)
-			
-		for hod in hodos.keys():
-		    event.reco[hod]=hodos[hod]
+			hodos["H2Y"] = H2Y(reg[0:3])
+			event.reco["H2Y"] = hodos["H2Y"]
+
+		
+		
+		# Fill Histos
+		
+                for h in hodos.keys():
+                        self.hists[h].Fill(hodos[h])
+
+		event.reco["HODOS"] = hodos
+
+
+		

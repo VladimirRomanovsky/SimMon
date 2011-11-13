@@ -11,7 +11,7 @@ class Event:
 		return self.data[4]
 		
 	def _decode_eq(self,buf):
-#		print buf
+		#print len(buf),buf
 		size = len(buf)
 		k = 0
 		
@@ -23,7 +23,7 @@ class Event:
 			d = d&0xFF
 			if self.eq == 128:
 				d = d | 0x8
-#			print l,d
+			#print l,d
 
 			self.det[d] = buf[k:k+l]
 			k += l
@@ -32,15 +32,13 @@ class Event:
 		size = len(buf)
 		k = 0
 		while k+6<size:
-#			print buf[k:k+6]
+			#print buf[k:k+10]
 			eqsize = buf[k+4]/2
 			self.eq = buf[3]
 			self._decode_eq(buf[k+6:k+6+eqsize])
 			k+=6+eqsize
 			
 	def _decode(self,buf):
-		if len(buf)<40:
-			return
 		nL = buf[25]
 #		print "_decode",buf[0:40]
 		k = 40

@@ -1,6 +1,7 @@
 from ROOT import TH1F,TH2F
 
 from numpy import zeros
+from utils import *
 from copy import deepcopy
 
 class ViewGAMS:
@@ -31,10 +32,31 @@ class ViewGAMS:
 		self.hclxyg = TH2F( 'hclxyg', 'hclxyg',48, 1, 49, 48, 1, 49 )
 		self.hclxyeg = TH2F( 'hclxyeg', 'hclxyeg',48, 1, 49, 48, 1, 49 )
 
+		dirMu = self.dir.mkdir("Mu")
+		dirMu.cd()
+		self.hclxyMu = []
+		self.hclxyMu.append(TH2F( 'hclxy1', 'hclxy',48, 1, 49, 48, 1, 49 ))
+		self.hclxyMu.append(TH2F( 'hclxy2', 'hclxy',48, 1, 49, 48, 1, 49 ))
+		self.hclxyMu.append(TH2F( 'hclxy3', 'hclxy',48, 1, 49, 48, 1, 49 ))
+		self.hclxyMu.append(TH2F( 'hclxy4', 'hclxy',48, 1, 49, 48, 1, 49 ))
+		self.hclsumMu = TH1F( 'hclsum', 'hclsum',1000, 0, 4000 )
+		self.hclsumMuG = TH1F( 'hclsumG', 'hclsum',1000, 0, 4000 )
+
 		self.bad = []
 		
 #		self.bad.append((ix, iy))
-		self.bad.append((25, 32))
+		self.bad.append((  5, 44))
+		self.bad.append((  2, 46))
+		self.bad.append(( 26, 48))
+		self.bad.append(( 30,  4))
+		self.bad.append(( 30,  6))
+		self.bad.append(( 38, 24))
+		self.bad.append(( 13, 23))
+		self.bad.append(( 19, 19))
+		self.bad.append(( 25, 32))
+		self.bad.append(( 23, 35))
+		self.bad.append(( 27, 24))
+		self.bad.append(( 26, 26))
 
 		baddir = self.dir.mkdir("BAD")
 		baddir.cd()
@@ -71,7 +93,22 @@ class ViewGAMS:
 			qdc = (event.reco["QDC-0"],event.reco["QDC-1"],event.reco["QDC-2"])
 		except KeyError:
 			return
-
+		try:
+			m8 = qdc[2].moduls[8]
+			Mu = []
+			for a,e in m8:
+				if e == 71 and a>20:
+					Mu.append(0)
+				if e == 70 and a>20:
+					Mu.append(1)
+				if e == 69 and a>20:
+					Mu.append(2)
+				if e == 68 and a>20:
+					Mu.append(3)
+			
+		except KeyError:
+			Mu = []
+			
 		gams = zeros((50,50),int) 
 		gamsl = [] 
 
@@ -111,7 +148,7 @@ class ViewGAMS:
 		for x,y,a in gamsl:
 			if a>=10:
 				maxv = gams[x-1:x+2,y-1:y+2].max()
-				if a==maxv and maxv>0:
+				if a==maxv and maxv>10:
 					sumcl = 0
 					numcl = 0
 					gams[x-1:x+2,y-1:y+2] = -abs(gams[x-1:x+2,y-1:y+2])
@@ -130,5 +167,17 @@ class ViewGAMS:
 				self.hclxyg.Fill(xcl,ycl)
 				self.hclxyeg.Fill(xcl,ycl,ecl)
 
-
+			for imu in Mu:
+				self.hclxyMu[imu].Fill(xcl,ycl)				
+			if Mu:
+				self.hclsumMu.Fill(ecl)				
 		
+			if 0 in Mu and xcl>24 and ycl<=24:
+				self.hclsumMuG.Fill(ecl)
+			if 1 in Mu and xcl<=24 and ycl>24:
+				self.hclsumMuG.Fill(ecl)
+			if 2 in Mu and xcl<=24 and ycl<=24:
+				self.hclsumMuG.Fill(ecl)
+			if 3 in Mu and xcl>24 and ycl>24:
+				self.hclsumMuG.Fill(ecl)
+				

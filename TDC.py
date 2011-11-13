@@ -9,7 +9,7 @@ class DecodeTDC:
 	def Execute(self,event):
 		
 		try:
-			data = event.det[20]
+			data = event.det[9]
 			if len(data)==6:
 				event.reco["TDC"]=data[2:6]
 		except 	KeyError:
